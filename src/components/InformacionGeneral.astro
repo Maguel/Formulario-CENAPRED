@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulario Responsive</title>
+    <style>
+      /* Estilos base - Mobile First */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111;
+        font-size: 13.5px;
+        line-height: 1.4;
+        padding: 10px;
+        background: #f5f5f5;
+      }
+
+      /* Contenedor */
+      .panel {
+        max-width: 1060px;
+        margin: 14px auto;
+        border: 2px solid #00b7c7;
+        background: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      /* Cabecera */
+      .panel__header {
+        background: #00b7c7;
+        color: #fff;
+        padding: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .panel__header h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+      }
+
+      .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .field-inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .field-inline input.short {
+        width: 100%;
+        max-width: 110px;
+        min-width: 60px;
+        flex: 1;
+      }
+
+      /* Filas de captura */
+      .row {
+        padding: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        border-top: 1px solid #eaeaea;
+      }
+
+      .cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        width: 100%;
+      }
+
+      .lbl {
+        font-size: 12.5px;
+        color: #0a0a0a;
+        font-weight: 600;
+      }
+
+      /* Líneas de texto */
+      .line {
+        border: none;
+        border-bottom: 1.8px solid #0f0f0f;
+        background: transparent;
+        padding: 0.4rem 0.3rem;
+        font-size: 13.5px;
+        color: #111;
+        outline: none;
+        width: 100%;
+      }
+
+      .line::placeholder {
+        color: #8aa5ac;
+      }
+
+      .line.short {
+        max-width: 100px;
+      }
+
+      .line-mini {
+        width: 100%;
+        border: none;
+        border-bottom: 1.8px solid #0f0f0f;
+        background: transparent;
+        padding: 0.3rem;
+        max-width: 80px;
+      }
+
+      /* Teléfono */
+      .phone {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.3rem;
+        margin-top: 0.2rem;
+      }
+
+      .phone .paren {
+        opacity: 0.75;
+      }
+
+      .phone .line-mini {
+        text-align: center;
+        flex: 1;
+      }
+
+      .phone .cc {
+        max-width: 50px;
+      }
+
+      .phone .area {
+        max-width: 60px;
+      }
+
+      .phone .blk {
+        max-width: 70px;
+      }
+
+      .hint {
+        display: block;
+        margin-top: 0.25rem;
+        color: #55747b;
+        font-size: 11.5px;
+        width: 100%;
+      }
+
+      /* Matrices de checkbox */
+      .subpanel {
+        border-top: 2px solid #00b7c7;
+        padding: 0.8rem;
+      }
+
+      .subpanel h3 {
+        margin: 0.2rem 0 0.8rem;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #0f0f0f;
+      }
+
+      .matrix {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .chk {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+
+      .chk input[type="checkbox"] {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1.8px solid #0f0f0f;
+        background: #fff;
+        display: inline-grid;
+        place-items: center;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .chk input[type="checkbox"]:checked {
+        background: #00b7c7;
+        box-shadow: inset 0 0 0 2px #fff;
+      }
+
+      /* "Otro" con input en línea */
+      .chk--other {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .line-other {
+        border: none;
+        border-bottom: 1.8px solid #0f0f0f;
+        background: transparent;
+        padding: 0.3rem;
+        font-size: 13.5px;
+        flex: 1;
+        min-width: 150px;
+      }
+
+      /* Dimensiones X/Y en línea */
+      .dims__row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .dims__row {
+          flex-direction: row;
+          align-items: center;
+          gap: 0.35rem;
+        }
+      }
+
+      .dims__row span {
+        white-space: nowrap;
+      }
+
+      .dim-field {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+      }
+
+/* En móvil, cada campo de dimensión ocupa toda la fila, pero los elementos internos siguen en línea */
+
+      /* Media Queries para responsiveness */
+      @media (min-width: 480px) {
+        .matrix.two {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.6rem 1rem;
+        }
+
+        .phone {
+          flex-wrap: nowrap;
+        }
+      }
+
+      @media (min-width: 600px) {
+        .panel__header {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
+
+        .meta {
+          flex-direction: row;
+          gap: 1rem;
+        }
+
+        .row.two {
+          flex-direction: row;
+        }
+
+        .row.three {
+          flex-direction: row;
+        }
+
+        .row.four {
+          flex-direction: row;
+        }
+
+        .matrix.three {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0.6rem 1rem;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .row.two .cell {
+          width: 50%;
+        }
+
+        .row.three .cell {
+          width: calc(100% / 3);
+        }
+
+        .row.four .cell {
+          width: 25%;
+        }
+
+        .field-inline {
+          white-space: nowrap;
+        }
+      }
+
+      @media (max-width: 359px) {
+        .dims__row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .phone {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .phone .line-mini {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="panel">
+      <header class="panel__header">
+        <h2>INFORMACIÓN GENERAL</h2>
+        <div class="meta">
+          <div class="field-inline">
+            <span>Fecha:</span>
+            <input type="date" />
+          </div>
+
+          <div class="field-inline">
+            <span>Coordenadas:&nbsp;</span>
+            <span>N</span><input
+              class="short"
+              type="text"
+              inputmode="decimal"
+              placeholder="19° 25' 56&quot;"
+            />
+            <span>O</span><input
+              class="short"
+              type="text"
+              inputmode="decimal"
+              placeholder="99° 08' 45&quot;"
+            />
+            <span>msnm</span><input
+              class="short"
+              type="text"
+              inputmode="numeric"
+              placeholder="2250"
+            />
+          </div>
+        </div>
+      </header>
+
+      <!-- 1) Nombre -->
+      <div class="row one">
+        <label class="lbl">Nombre del inmueble</label>
+        <input type="text" class="line" />
+      </div>
+
+      <!-- 2) Calle | Colonia | CP -->
+      <div class="row three">
+        <div class="cell">
+          <label class="lbl">Calle y número</label>
+          <input type="text" class="line" />
+        </div>
+        <div class="cell">
+          <label class="lbl">Colonia</label>
+          <input type="text" class="line" />
+        </div>
+        <div class="cell">
+          <label class="lbl">Código postal</label>
+          <input type="text" class="line" inputmode="numeric" />
+        </div>
+      </div>
+
+      <!-- 3) Pueblo/Ciudad | Municipio | Estado -->
+      <div class="row three">
+        <div class="cell">
+          <label class="lbl">Pueblo o ciudad</label>
+          <input type="text" class="line" />
+        </div>
+        <div class="cell">
+          <label class="lbl">Delegación/Municipio</label>
+          <input type="text" class="line" />
+        </div>
+        <div class="cell">
+          <label class="lbl">Estado</label>
+          <input type="text" class="line" />
+        </div>
+      </div>
+
+      <!-- 4) Referencias -->
+      <div class="row one">
+        <label class="lbl"
+          >Referencias (entre calles "A" y "B", sitio notable, etc.)</label
+        >
+        <input type="text" class="line" />
+      </div>
+
+      <!-- 5) Contacto | Teléfono -->
+      <div class="row two">
+        <div class="cell">
+          <label class="lbl">Persona contactada / propietario</label>
+          <input type="text" class="line" />
+        </div>
+
+        <!-- Teléfono: +(51) 221 150 2883 -->
+        <div class="cell">
+          <label class="lbl">Teléfono</label>
+          <div class="phone">
+            <span>+</span>
+            <input
+              class="cc line-mini"
+              type="text"
+              inputmode="numeric"
+              placeholder="51"
+              aria-label="Código país"
+            />
+            <span class="paren">(</span>
+            <input
+              class="area line-mini"
+              type="text"
+              inputmode="numeric"
+              placeholder="221"
+              aria-label="Lada"
+            />
+            <span class="paren">)</span>
+            <input
+              class="blk line-mini"
+              type="text"
+              inputmode="numeric"
+              placeholder="150"
+              aria-label="Bloque 1"
+            />
+            <input
+              class="blk line-mini"
+              type="text"
+              inputmode="numeric"
+              placeholder="2883"
+              aria-label="Bloque 2"
+            />
+          </div>
+          <small class="hint"
+            >Formato: +(país) lada 10 dígitos — p. ej. +(51) 221 150 2883</small
+          >
+        </div>
+      </div>
+
+      <!-- 6) Uso -->
+      <div class="subpanel">
+        <h3>Uso</h3>
+        <div class="matrix two">
+          <label class="chk"
+            ><input type="checkbox" /><span>Vivienda</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Oficinas</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Comercio</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Escuela</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Hospital</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Iglesia</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Reunión (cine/estadio/salón)</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Industrial (fábrica/bodega)</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Desocupada</span></label
+          >
+
+          <!-- "Otro" con input de texto para especificar -->
+          <label class="chk chk--other">
+            <input type="checkbox" />
+            <span>Otro:</span>
+            <input type="text" class="line-other" placeholder="Especifique" />
+          </label>
+        </div>
+      </div>
+
+      <!-- 7) Dimensiones / características -->
+      <div class="subpanel">
+        <h3>Dimensiones y características</h3>
+        <div class="row four">
+          <div class="cell">
+            <label class="lbl">No. niveles</label>
+            <input type="text" class="line short" />
+          </div>
+          <div class="cell">
+            <label class="lbl">No. sótanos</label>
+            <input type="text" class="line short" />
+          </div>
+          <div class="cell">
+            <label class="lbl">No. ocupantes</label>
+            <input type="text" class="line short" />
+          </div>
+          <div class="cell dims">
+            <label class="lbl">Dimensiones</label>
+            <div class="dims__row">
+              <div class="dim-field">
+                <span>Frente X</span>
+                <input type="text" class="line-mini" />
+                <span>m</span>
+              </div>
+              <div class="dim-field">
+                <span>Fondo Y</span>
+                <input type="text" class="line-mini" />
+                <span>m</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8) Topografía -->
+      <div class="subpanel">
+        <h3>Topografía</h3>
+        <div class="matrix three">
+          <label class="chk"
+            ><input type="checkbox" /><span>Planicie</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Ladera de cerro</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Rivera río/lago</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Fondo de valle</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Depósitos lacustres</span></label
+          >
+          <label class="chk"><input type="checkbox" /><span>Costa</span></label>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

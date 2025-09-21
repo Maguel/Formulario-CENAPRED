@@ -1,0 +1,395 @@
+---
+
+---
+
+// src/components/EvaluacionDanos.astro
+
+<section class="panel">
+  <header class="panel__header">
+    <h2>EVALUACIÓN DE DAÑOS</h2>
+  </header>
+
+  <div class="grid">
+    <!-- IZQUIERDA -->
+    <aside class="left">
+      <div class="group">
+        <h3>Geotécnicos:</h3>
+        <label class="chk"
+          ><input type="checkbox" /><span>Grietas en el terreno</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Hundimientos</span></label
+        >
+        <div class="inline">
+          <label class="chk"
+            ><input type="checkbox" /><span>Inclinación del</span></label
+          >
+          <span class="break">edificio:</span>
+          <input class="line-mini" type="text" inputmode="decimal" />
+          <span>%</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Losas:</h3>
+        <label class="chk"><input type="checkbox" /><span>Colapso</span></label>
+        <div class="inline">
+          <label class="chk"
+            ><input type="checkbox" /><span>Grietas máx:</span></label
+          >
+          <input class="line-mini" type="text" inputmode="decimal" />
+          <span>mm</span>
+        </div>
+        <div class="inline">
+          <label class="chk"
+            ><input type="checkbox" /><span>Flecha máx:</span></label
+          >
+          <input class="line-mini" type="text" inputmode="decimal" />
+          <span>cm</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="inline">
+          <span class="lbl">Conexiones:</span>
+          <label class="chk inl"
+            ><input type="checkbox" /><span>Falla</span></label
+          >
+        </div>
+      </div>
+    </aside>
+
+    <!-- MATRIZ CENTRAL ALINEADA -->
+    <section class="damage-grid">
+      <!-- Encabezados verticales (columnas 2..8) -->
+      <div class="vhead" style="grid-column:2;">Colapso</div>
+      <div class="vhead" style="grid-column:3;">Grietas cortante</div>
+      <div class="vhead" style="grid-column:4;">Grietas flexión</div>
+      <div class="vhead" style="grid-column:5;">Aplastamiento</div>
+      <div class="vhead" style="grid-column:6;">Pandeo barras</div>
+      <div class="vhead" style="grid-column:7;">Pandeo placas</div>
+      <div class="vhead" style="grid-column:8;">Falla soldadura</div>
+
+      <!-- Etiquetas de filas (columna 1, filas 2..5) -->
+      <div class="rowlabels">
+        <span>Columnas</span>
+        <span>Trabes</span>
+        <span>Muro Concreto</span>
+        <span>Mampost.</span>
+      </div>
+
+      <!-- Celdas 4×7 perfectamente alineadas (columnas 2..8, filas 2..5) -->
+      <div class="cells">
+        {
+          Array.from({ length: 28 }).map((_, i) => (
+            <label class="chk cell">
+              <input type="checkbox" />
+            </label>
+          ))
+        }
+      </div>
+
+      <!-- Mediciones (columna 9, filas 2..5) -->
+      <div class="measures">
+        <div class="mrow">
+          <span>Ancho máximo<br />de grieta (mm)</span>
+          <input class="line" type="text" />
+        </div>
+        <div class="mrow">
+          <span>Separación de<br />estribos (cm)</span>
+          <input class="line" type="text" />
+          <span class="t">t=</span>
+          <input class="line tiny" type="text" />
+        </div>
+        <div class="mrow">
+          <span>Sección o<br />espesor de muro (cm)</span>
+          <input class="line" type="text" />
+          <span class="t">t=</span>
+          <input class="line tiny" type="text" />
+        </div>
+      </div>
+    </section>
+
+    <!-- DERECHA -->
+    <aside class="right">
+      <div class="box">
+        <h3>Entrepiso crítico (más débil y/o más dañado):</h3>
+        <div class="linepair">
+          <span>No. de columnas (o muros) daño severo =</span>
+          <input class="line" type="text" />
+        </div>
+        <small class="hint"
+          >(colapso, aplastamiento, pandeo, grietas &gt; 3 mm)</small
+        >
+        <div class="linepair">
+          <span>Total de columnas (muros) en el entrepiso =</span>
+          <input class="line" type="text" />
+        </div>
+      </div>
+
+      <div class="box level">
+        <h3>NIVEL DE DAÑO DE LA ESTRUCTURA</h3>
+        <label class="chk"
+          ><input type="checkbox" /><span>Colapso total</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Daño severo</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Daño medio</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Daño ligero</span></label
+        >
+      </div>
+    </aside>
+  </div>
+
+  <!-- OTROS DAÑOS -->
+  <footer class="others">
+    <span class="lbl">Otros daños:</span>
+    <label class="chk inl"><input type="checkbox" /><span>Vidrios</span></label>
+    <label class="chk inl"><input type="checkbox" /><span>Acabados</span></label
+    >
+    <label class="chk inl"><input type="checkbox" /><span>Plafones</span></label
+    >
+    <label class="chk inl"><input type="checkbox" /><span>Fachadas</span></label
+    >
+    <label class="chk inl"
+      ><input type="checkbox" /><span>Bardas y pretiles</span></label
+    >
+    <label class="chk inl"
+      ><input type="checkbox" /><span>Cubos <i>(escalera/elevador)</i></span
+      ></label
+    >
+    <label class="chk inl"
+      ><input type="checkbox" /><span>Instalaciones</span></label
+    >
+  </footer>
+</section>
+
+<style>
+  /* Variables para alinear todos los elementos de la matriz */
+  :root {
+    --roww: 120px; /* ancho columna de etiquetas de filas */
+    --cell: 26px; /* tamaño de cada celda (checkbox)   */
+    --gap: 10px; /* separación entre celdas           */
+    --head: 86px; /* alto del renglón de encabezados   */
+    --meaw: 360px; /* ancho del bloque de mediciones     */
+  }
+
+  .panel {
+    width: min(1060px, 94vw);
+    margin: 14px auto;
+    border: 2px solid #000;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    font-size: 13.5px;
+  }
+  .panel__header {
+    background: linear-gradient(#9fe7ef, #9fe7ef);
+    border-bottom: 2px solid #000;
+    padding: 0.45rem 0.8rem;
+  }
+  .panel__header h2 {
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 290px 1fr 320px;
+  }
+
+  /* IZQUIERDA */
+  .left {
+    border-right: 2px solid #000;
+    padding: 0.6rem 0.8rem;
+  }
+  .group {
+    margin-bottom: 0.7rem;
+  }
+  .group h3 {
+    margin: 0.2rem 0 0.4rem;
+    font-size: 13.5px;
+  }
+  .lbl {
+    font-weight: 700;
+  }
+  .inline {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .line-mini {
+    width: 80px;
+    border: none;
+    border-bottom: 1.8px solid #0f0f0f;
+    background: transparent;
+    padding: 0.12rem 0.2rem;
+  }
+
+  /* MATRIZ CENTRAL PERFECTAMENTE ALINEADA */
+  .damage-grid {
+    border-right: 2px solid #000;
+    padding: 0.6rem 0.7rem;
+    display: grid;
+    grid-template-columns: var(--roww) repeat(7, var(--cell)) var(--meaw);
+    column-gap: var(--gap);
+    grid-template-rows: var(--head) repeat(4, var(--cell));
+    row-gap: var(--gap);
+  }
+  /* Encabezados verticales ubicados en la fila 1 */
+  .vhead {
+    grid-row: 1;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    font-weight: 700;
+    color: #0a0a0a;
+    align-self: end;
+  }
+
+  /* Etiquetas de filas (ocupan col 1, filas 2..5) */
+  .rowlabels {
+    grid-column: 1;
+    grid-row: 2 / span 4;
+    display: grid;
+    grid-auto-rows: var(--cell);
+    align-items: center;
+    font-weight: 700;
+  }
+
+  /* Celdas (ocupan col 2..8, filas 2..5) */
+  .cells {
+    grid-column: 2 / span 7;
+    grid-row: 2 / span 4;
+    display: grid;
+    grid-template-columns: repeat(7, var(--cell));
+    grid-auto-rows: var(--cell);
+    gap: var(--gap);
+    align-content: start;
+  }
+  .cell input {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1.8px solid #0f0f0f;
+    background: #fff;
+    cursor: pointer;
+  }
+  .cell input:checked {
+    background: #00b7c7;
+    box-shadow: inset 0 0 0 2px #fff;
+  }
+
+  /* Mediciones (col 9, filas 2..5) */
+  .measures {
+    grid-column: 9;
+    grid-row: 2 / span 4;
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+  }
+  .mrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .line {
+    border: none;
+    border-bottom: 1.8px solid #0f0f0f;
+    background: transparent;
+    padding: 0.12rem 0.2rem;
+    min-width: 140px;
+  }
+  .line.tiny {
+    min-width: 70px;
+  }
+  .t {
+    font-weight: 700;
+  }
+
+  /* DERECHA */
+  .right {
+    padding: 0.6rem 0.8rem;
+  }
+  .box {
+    border: 2px solid #000;
+    padding: 0.6rem 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .box h3 {
+    margin: 0.1rem 0 0.5rem;
+    font-size: 13.5px;
+  }
+  .linepair {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.25rem 0;
+  }
+  .hint {
+    display: block;
+    margin: 0.1rem 0 0.4rem;
+    color: #39555b;
+    font-size: 11.5px;
+  }
+  .level label {
+    display: block;
+    margin: 0.25rem 0;
+  }
+
+  /* OTROS DAÑOS */
+  .others {
+    border-top: 2px solid #000;
+    padding: 0.5rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  /* Checkboxes base */
+  .chk {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .chk input[type="checkbox"] {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1.8px solid #0f0f0f;
+    background: #fff;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .chk input[type="checkbox"]:checked {
+    background: #00b7c7;
+    box-shadow: inset 0 0 0 2px #fff;
+  }
+  .chk.inl {
+    gap: 0.35rem;
+  }
+
+  @media (max-width: 980px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .left {
+      border-right: none;
+      border-bottom: 2px solid #000;
+    }
+    .damage-grid {
+      border-right: none;
+      border-bottom: 2px solid #000;
+    }
+  }
+</style>

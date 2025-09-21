@@ -1,0 +1,477 @@
+---
+// src/components/SistemaEstructural.astro
+// Replica visual exacta del componente según la imagen enviada.
+// Solo presentación (HTML + CSS). Sin lógica ni validaciones.
+---
+
+<section class="panel">
+  <header class="panel__header">
+    <h2>SISTEMA ESTRUCTURAL</h2>
+    <p class="banner">
+      La dirección X es paralela a la fachada, indicar X, Y en el croquis
+    </p>
+  </header>
+
+  <!-- Dirección X / Dirección Y -->
+  <div class="xy">
+    <div class="xy__col">
+      <div class="xy__label">Dirección X</div>
+      <div class="matrix two">
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos de acero</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de concreto</span></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos de concreto</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de carga de mampostería</span
+          ></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span
+            >Columnas y losa plana <i>(sin vigas)</i></span
+          ></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos y muros diafragma</span></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Uso de contravientos</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de adobe o bahareque</span
+          ></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de madera, lámina, otros</span
+          ></label
+        >
+      </div>
+    </div>
+
+    <div class="xy__divider"></div>
+
+    <div class="xy__col">
+      <div class="xy__label">Dirección Y</div>
+      <div class="matrix two">
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos de acero</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de concreto</span></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos de concreto</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de carga de mampostería</span
+          ></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span
+            >Columnas y losa plana <i>(sin vigas)</i></span
+          ></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Marcos y muros diafragma</span></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Uso de contravientos</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de adobe o bahareque</span
+          ></label
+        >
+
+        <label class="chk"
+          ><input type="checkbox" /><span>Muros de madera, lámina, otros</span
+          ></label
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 columnas: Muros de mampostería / Sistema de piso / Sistema de techo / Cimentación -->
+  <div class="row four with-border">
+    <div class="subpanel">
+      <h3>Muros de mampostería</h3>
+      <div class="matrix">
+        <label class="chk"
+          ><input type="checkbox" /><span>Confinada</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Refuerzo interior</span></label
+        >
+        <label class="chk"><input type="checkbox" /><span>Simple</span></label>
+        <label class="chk"
+          ><input type="checkbox" /><span>Bloque concreto 20×40 cm</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Tabique arcilla (ladrillo)</span
+          ></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Tabique hueco de arcilla</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Tabicón de concreto</span></label
+        >
+      </div>
+    </div>
+
+    <div class="subpanel">
+      <h3>Sistema de piso</h3>
+      <div class="matrix">
+        <label class="chk"
+          ><input type="checkbox" /><span>Losa maciza</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Losa reticular</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Vigueta y bovedilla</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>No se sabe</span></label
+        >
+      </div>
+    </div>
+
+    <div class="subpanel">
+      <h3>Sistema de techo</h3>
+      <div class="matrix">
+        <label class="chk"
+          ><input type="checkbox" /><span>Igual al de piso</span></label
+        >
+        <label class="chk"><input type="checkbox" /><span>Lámina</span></label>
+        <label class="chk"><input type="checkbox" /><span>Teja</span></label>
+        <label class="chk chk--other">
+          <input type="checkbox" />
+          <span>Otro:</span>
+          <input type="text" class="line-other" />
+        </label>
+      </div>
+    </div>
+
+    <div class="subpanel">
+      <h3>Cimentación</h3>
+      <div class="matrix">
+        <label class="chk"
+          ><input type="checkbox" /><span>Zapatas aisladas</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Zapatas corridas</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Cimiento de piedra</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>Losa de cimentación</span></label
+        >
+        <label class="chk"><input type="checkbox" /><span>Cajón</span></label>
+        <label class="chk"
+          ><input type="checkbox" /><span>Pilotes / pilas</span></label
+        >
+        <label class="chk"
+          ><input type="checkbox" /><span>No se sabe</span></label
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- VULNERABILIDAD -->
+  <div class="subpanel vul">
+    <h3>VULNERABILIDAD</h3>
+
+    <div class="vul__grid">
+      <!-- Columna izquierda: Irregular en Planta -->
+      <div class="vul__col">
+        <div class="vul__side">Irregular<br />en Planta</div>
+        <div class="matrix">
+          <label class="chk"
+            ><input type="checkbox" /><span
+              >Asimetría por muros, cubos, cargas</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span
+              >Grandes aberturas, entrantes/salientes</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span
+              >Geometría irregular en planta “L”, “T”, “H”</span
+            ></label
+          >
+        </div>
+      </div>
+
+      <!-- Columna central: Irregular en Elevación -->
+      <div class="vul__col">
+        <div class="vul__side">Irregular<br />en Elevación</div>
+        <div class="matrix">
+          <label class="chk"
+            ><input type="checkbox" /><span>Planta baja de doble altura</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Muros no llegan a cimentación</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Planta baja flexible</span></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span>Columna corta</span></label
+          >
+        </div>
+      </div>
+
+      <!-- Columna derecha: Posición en manzana + separación -->
+      <div class="vul__col">
+        <div class="matrix">
+          <div class="inline">
+            <span class="lbl">Posición en manzana:</span>
+            <label class="chk inl"
+              ><input type="checkbox" /><span>Esquina</span></label
+            >
+            <label class="chk inl"
+              ><input type="checkbox" /><span>Medio</span></label
+            >
+            <label class="chk inl"
+              ><input type="checkbox" /><span>Aislado</span></label
+            >
+          </div>
+
+          <label class="chk"
+            ><input type="checkbox" /><span
+              >Grandes masas en pisos superiores</span
+            ></label
+          >
+          <label class="chk"
+            ><input type="checkbox" /><span
+              >Reducción brusca de pisos superiores</span
+            ></label
+          >
+
+          <div class="inline">
+            <span class="lbl">Separación edif vecino:</span>
+            <input type="text" class="line-mini" inputmode="numeric" />
+            <span>cm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Contenedor y tipografía (coherente con el primer componente) */
+  .panel {
+    width: min(1060px, 100vw);
+    margin: 14px auto;
+    border: 2px solid #00b7c7;
+    border-radius: 4px;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    font-size: 13.5px;
+  }
+
+  .panel__header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 0.5rem;
+    background: #00b7c7;
+    color: #fff;
+    padding: 0.55rem 0.9rem;
+  }
+  .panel__header h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .banner {
+    margin: 0;
+    background: #c9f1f6;
+    color: #08313a;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #8ed8e0;
+    font-size: 12px;
+    border-radius: 3px;
+  }
+
+  /* Bloque X/Y */
+  .xy {
+    display: grid;
+    grid-template-columns: 1fr 12px 1fr;
+    gap: 0;
+    border-top: 2px solid #00b7c7;
+  }
+  .xy__col {
+    padding: 0.6rem 0.9rem;
+  }
+  .xy__divider {
+    border-left: 2px dashed #6e9196;
+    margin: 0.6rem 0;
+  }
+  .xy__label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    font-weight: 1000;
+    float: left;
+    margin-right: 0.6rem;
+    color: #0a0a0a;
+  }
+  .xy__col .matrix {
+    margin-left: 1.6rem;
+  }
+
+  /* Subsecciones 4 columnas */
+  .row.four {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .with-border {
+    border-top: 2px solid #000;
+  }
+  .subpanel {
+    border-left: 1px solid #000;
+    padding: 0.6rem 0.9rem;
+  }
+  .row.four .subpanel:first-child {
+    border-left: none;
+  }
+  .subpanel h3 {
+    margin: 0.2rem 0 0.6rem;
+    font-size: 13.5px;
+    font-weight: 800;
+  }
+
+  /* Vulnerabilidad */
+  .vul {
+    border-top: 2px solid #000;
+  }
+  .vul__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .vul__col {
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.4rem 0.9rem;
+    border-left: 1px solid #000;
+  }
+  .vul__col:first-child {
+    border-left: none;
+  }
+  .vul__side {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: 700;
+    color: #0a0a0a;
+    letter-spacing: 0.2px;
+    padding-inline: 0.2rem;
+  }
+
+  /* Matrices y controles reutilizables */
+  .matrix {
+    display: grid;
+    gap: 0.45rem 0.9rem;
+  }
+  .matrix.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chk {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .chk input[type="checkbox"] {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1.8px solid #0f0f0f;
+    background: #fff;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .chk input[type="checkbox"]:checked {
+    background: #00b7c7;
+    box-shadow: inset 0 0 0 2px #fff;
+  }
+  .chk i {
+    font-style: italic;
+  }
+
+  .chk--other {
+    gap: 0.5rem;
+  }
+  .line-other {
+    border: none;
+    border-bottom: 1.8px solid #0f0f0f;
+    background: transparent;
+    padding: 0.1rem 0.2rem;
+    min-width: 120px;
+    font-size: 13.5px;
+  }
+  .line-mini {
+    width: 90px;
+    border: none;
+    border-bottom: 1.8px solid #0f0f0f;
+    background: transparent;
+    padding: 0.15rem 0.2rem;
+  }
+
+  .inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .inline .lbl {
+    font-weight: 600;
+  }
+
+  @media (max-width: 980px) {
+    .row.four {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 720px) {
+    .xy {
+      grid-template-columns: 1fr;
+    }
+    .xy__divider {
+      display: none;
+    }
+    .row.four {
+      grid-template-columns: 1fr;
+    }
+    .vul__grid {
+      grid-template-columns: 1fr;
+    }
+    .vul__col {
+      border-left: none;
+      border-top: 1px solid #000;
+    }
+    .vul__col:first-child {
+      border-top: none;
+    }
+  }
+</style>
