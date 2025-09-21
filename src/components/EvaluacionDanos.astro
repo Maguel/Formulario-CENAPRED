@@ -1,435 +1,661 @@
----
-// src/components/EvaluacionDanos.astro
----
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evaluación de Daños - Mejorada</title>
+    <style>
+      /* ===== Variables escalables mejoradas ===== */
+      :root {
+        --colLabels: clamp(88px, 10vw, 118px);
+        --cellSize: clamp(18px, 2.8vw, 26px);
+        --gapCells: clamp(6px, 1vw, 10px);
+        --headH: clamp(64px, 9vw, 90px);
+        --measuresW: clamp(240px, 28vw, 360px);
+        --panelPadding: clamp(8px, 1.5vw, 16px);
+      }
 
-<section class="panel">
-  <header class="panel__header">
-    <h2>EVALUACIÓN DE DAÑOS</h2>
-  </header>
+      /* ===== Estilo base coherente ===== */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  <div class="layout">
-    <!-- IZQUIERDA -->
-    <aside class="left">
-      <div class="group">
-        <h3>Geotécnicos:</h3>
-        <label class="chk"
-          ><input type="checkbox" /><span>Grietas en el terreno</span></label
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #f5f5f5;
+        padding: 16px;
+        color: #111;
+        font-size: 13.5px;
+        line-height: 1.4;
+      }
+
+      .panel {
+        width: min(1060px, 94vw);
+        margin: 14px auto;
+        border: 2px solid #00b7c7;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .panel__header {
+        background: #00b7c7;
+        color: #fff;
+        padding: 0.55rem 0.9rem;
+        border-bottom: 2px solid #0aa;
+      }
+
+      .panel__header h2 {
+        margin: 0;
+        font-size: 15.5px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        text-align: center;
+      }
+
+      /* Layout con columna derecha flexible (evita overflow) */
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(240px, 300px) 1fr minmax(240px, 320px);
+        border-top: 2px solid #000;
+      }
+
+      /* ===== Lado izquierdo ===== */
+      .left {
+        border-right: 2px solid #000;
+        padding: var(--panelPadding);
+      }
+
+      .group {
+        margin-bottom: 0.75rem;
+      }
+
+      .group h3 {
+        margin: 0.2rem 0 0.45rem;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #333;
+      }
+
+      .lbl {
+        font-weight: 700;
+      }
+
+      .inline {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+
+      .nowrap {
+        white-space: nowrap;
+      }
+
+      .line-mini {
+        width: 84px;
+        border: none;
+        border-bottom: 1.8px solid #0f0f0f;
+        background: transparent;
+        padding: 0.12rem 0.2rem;
+        font-size: 13px;
+      }
+
+      /* ===== Centro: matriz ===== */
+      .center {
+        border-right: 2px solid #000;
+        padding: var(--panelPadding);
+        overflow: hidden;
+      }
+
+      .damage-grid {
+        display: grid;
+        grid-template-columns: var(--colLabels) repeat(7, var(--cellSize)) minmax(
+            200px,
+            var(--measuresW)
+          );
+        grid-template-rows: var(--headH) repeat(4, var(--cellSize));
+        column-gap: var(--gapCells);
+        row-gap: var(--gapCells);
+      }
+
+      .vhead {
+        grid-row: 1;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        text-align: center;
+        font-weight: 700;
+        color: #0a0a0a;
+        align-self: end;
+        font-size: clamp(11px, 1.5vw, 13px);
+        padding: 4px 0;
+      }
+
+      .rowlabels {
+        grid-column: 1;
+        grid-row: 2 / span 4;
+        display: grid;
+        grid-auto-rows: var(--cellSize);
+        align-items: center;
+        font-weight: 700;
+        font-size: clamp(12px, 1.5vw, 13px);
+      }
+
+      .cells {
+        grid-column: 2 / span 7;
+        grid-row: 2 / span 4;
+        display: grid;
+        grid-template-columns: repeat(7, var(--cellSize));
+        grid-auto-rows: var(--cellSize);
+        gap: var(--gapCells);
+      }
+
+      .cell input {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1.8px solid #0f0f0f;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .cell input:checked {
+        background: #00b7c7;
+        box-shadow: inset 0 0 0 2px #fff;
+      }
+
+      /* Mediciones: ahora envuelven correctamente (t= ya no se sale) */
+      .measures {
+        grid-column: 9;
+        grid-row: 2 / span 4;
+        display: grid;
+        align-content: start;
+        gap: 0.6rem;
+      }
+
+      .mrow {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .mrow > span {
+        white-space: nowrap;
+        font-size: clamp(12px, 1.5vw, 13px);
+      }
+
+      .line {
+        border: none;
+        border-bottom: 1.8px solid #0f0f0f;
+        background: transparent;
+        padding: 0.12rem 0.2rem;
+        min-width: 120px;
+        flex: 1 1 120px;
+        font-size: 13px;
+      }
+
+      .line.flex {
+        flex: 1 1 160px;
+      }
+
+      .line.tiny {
+        flex: 0 0 clamp(56px, 8vw, 72px);
+      }
+
+      .t {
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      /* ===== Derecha ===== */
+      .right {
+        padding: var(--panelPadding);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .box {
+        border: 2px solid #000;
+        padding: 0.6rem;
+        flex: 1;
+      }
+
+      .box h3 {
+        margin: 0.1rem 0 0.45rem;
+        font-size: clamp(12.5px, 1.5vw, 13.5px);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+        hyphens: auto;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .linepair {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+
+      .linepair .line {
+        flex: 1 1 160px;
+        min-width: 120px;
+      }
+
+      .hint {
+        display: block;
+        margin: 0.15rem 0 0.45rem;
+        color: #39555b;
+        font-size: 11.5px;
+        font-style: italic;
+      }
+
+      .level label {
+        display: block;
+        margin: 0.25rem 0;
+      }
+
+      /* ===== Otros daños ===== */
+      .others {
+        border-top: 2px solid #000;
+        padding: 0.55rem 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+      }
+
+      .chk {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+      }
+
+      .chk input[type="checkbox"] {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1.8px solid #0f0f0f;
+        background: #fff;
+        display: inline-grid;
+        place-items: center;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .chk input[type="checkbox"]:checked {
+        background: #00b7c7;
+        box-shadow: inset 0 0 0 2px #fff;
+      }
+
+      .chk.inl {
+        gap: 0.35rem;
+      }
+
+      .break {
+        word-break: break-word;
+      }
+
+      /* ===== Responsivo mejorado ===== */
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .left {
+          border-right: none;
+          border-bottom: 2px solid #000;
+        }
+
+        .center {
+          border-right: none;
+          border-bottom: 2px solid #000;
+        }
+
+        .damage-grid {
+          grid-template-columns: var(--colLabels) repeat(7, var(--cellSize));
+        }
+
+        .measures {
+          grid-column: 1 / -1;
+          grid-row: auto;
+          margin-top: 0.5rem;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .panel {
+          width: 98vw;
+          margin: 8px auto;
+        }
+
+        .damage-grid {
+          grid-template-columns: var(--colLabels) repeat(7, var(--cellSize));
+        }
+
+        .measures {
+          grid-column: 1 / -1;
+          grid-row: auto;
+          margin-top: 0.5rem;
+        }
+
+        .inline {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+        }
+
+        .others {
+          gap: 0.5rem;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        :root {
+          --colLabels: 78px;
+          --cellSize: 16px;
+          --gapCells: 6px;
+          --headH: 60px;
+          --measuresW: 240px;
+        }
+
+        .panel {
+          font-size: 12.5px;
+        }
+
+        .line-mini {
+          width: 72px;
+        }
+
+        .rowlabels span,
+        .vhead {
+          font-size: 11px;
+        }
+
+        .mrow {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+        }
+
+        .line {
+          min-width: 100%;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .others {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .chk {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <section class="panel">
+      <header class="panel__header">
+        <h2>EVALUACIÓN DE DAÑOS</h2>
+      </header>
+
+      <div class="layout">
+        <!-- IZQUIERDA -->
+        <aside class="left">
+          <div class="group">
+            <h3>Geotécnicos:</h3>
+            <label class="chk"
+              ><input type="checkbox" /><span>Grietas en el terreno</span
+              ></label
+            >
+            <label class="chk"
+              ><input type="checkbox" /><span>Hundimientos</span></label
+            >
+            <div class="inline nowrap">
+              <label class="chk"
+                ><input type="checkbox" /><span>Inclinación del</span></label
+              >
+              <span class="break">edificio:</span>
+              <input class="line-mini" type="text" inputmode="decimal" />
+              <span>%</span>
+            </div>
+          </div>
+
+          <div class="group">
+            <h3>Losas:</h3>
+            <label class="chk"
+              ><input type="checkbox" /><span>Colapso</span></label
+            >
+            <div class="inline nowrap">
+              <label class="chk"
+                ><input type="checkbox" /><span>Grietas máx:</span></label
+              >
+              <input class="line-mini" type="text" inputmode="decimal" />
+              <span>mm</span>
+            </div>
+            <div class="inline nowrap">
+              <label class="chk"
+                ><input type="checkbox" /><span>Flecha máx:</span></label
+              >
+              <input class="line-mini" type="text" inputmode="decimal" />
+              <span>cm</span>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="inline">
+              <span class="lbl">Conexiones:</span>
+              <label class="chk inl"
+                ><input type="checkbox" /><span>Falla</span></label
+              >
+            </div>
+          </div>
+        </aside>
+
+        <!-- MATRIZ CENTRAL -->
+        <section class="center">
+          <div class="damage-grid">
+            <!-- Encabezados verticales (fila 1) -->
+            <div class="vhead" style="grid-column:2;">Colapso</div>
+            <div class="vhead" style="grid-column:3;">Grietas cortante</div>
+            <div class="vhead" style="grid-column:4;">Grietas flexión</div>
+            <div class="vhead" style="grid-column:5;">Aplastamiento</div>
+            <div class="vhead" style="grid-column:6;">Pandeo barras</div>
+            <div class="vhead" style="grid-column:7;">Pandeo placas</div>
+            <div class="vhead" style="grid-column:8;">Falla soldadura</div>
+
+            <!-- Etiquetas de filas (col 1, filas 2..5) -->
+            <div class="rowlabels">
+              <span>Columnas</span>
+              <span>Trabes</span>
+              <span>Muro Concreto</span>
+              <span>Mampost.</span>
+            </div>
+
+            <!-- Celdas 4×7 (col 2..8, filas 2..5) -->
+            <div class="cells">
+              <!-- Usamos un loop para generar 28 celdas -->
+              <label class="chk cell" aria-label="c1"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c2"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c3"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c4"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c5"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c6"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c7"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c8"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c9"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c10"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c11"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c12"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c13"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c14"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c15"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c16"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c17"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c18"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c19"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c20"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c21"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c22"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c23"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c24"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c25"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c26"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c27"
+                ><input type="checkbox" /></label
+              >
+              <label class="chk cell" aria-label="c28"
+                ><input type="checkbox" /></label
+              >
+            </div>
+
+            <!-- Mediciones (col 9; en móvil se reubica abajo) -->
+            <div class="measures">
+              <div class="mrow">
+                <span>Ancho máximo<br />de grieta (mm)</span>
+                <input class="line flex" type="text" />
+              </div>
+              <div class="mrow">
+                <span>Separación de<br />estribos (cm)</span>
+                <input class="line flex" type="text" />
+                <span class="t">t=</span>
+                <input class="line tiny" type="text" />
+              </div>
+              <div class="mrow">
+                <span>Sección o<br />espesor de muro (cm)</span>
+                <input class="line flex" type="text" />
+                <span class="t">t=</span>
+                <input class="line tiny" type="text" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DERECHA -->
+        <aside class="right">
+          <div class="box">
+            <h3>Entrepiso crítico (más débil y/o más dañado):</h3>
+            <div class="linepair">
+              <span>No. de columnas (o muros) daño severo =</span>
+              <input class="line" type="text" />
+            </div>
+            <small class="hint"
+              >(colapso, aplastamiento, pandeo, grietas &gt; 3 mm)</small
+            >
+            <div class="linepair">
+              <span>Total de columnas (muros) en el entrepiso =</span>
+              <input class="line" type="text" />
+            </div>
+          </div>
+
+          <div class="box level">
+            <h3>NIVEL DE DAÑO DE LA ESTRUCTURA</h3>
+            <label class="chk"
+              ><input type="checkbox" /><span>Colapso total</span></label
+            >
+            <label class="chk"
+              ><input type="checkbox" /><span>Daño severo</span></label
+            >
+            <label class="chk"
+              ><input type="checkbox" /><span>Daño medio</span></label
+            >
+            <label class="chk"
+              ><input type="checkbox" /><span>Daño ligero</span></label
+            >
+          </div>
+        </aside>
+      </div>
+
+      <!-- OTROS DAÑOS -->
+      <footer class="others">
+        <span class="lbl">Otros daños:</span>
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Vidrios</span></label
         >
-        <label class="chk"
-          ><input type="checkbox" /><span>Hundimientos</span></label
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Acabados</span></label
         >
-        <div class="inline nowrap">
-          <label class="chk"
-            ><input type="checkbox" /><span>Inclinación del</span></label
-          >
-          <span class="break">edificio:</span>
-          <input class="line-mini" type="text" inputmode="decimal" />
-          <span>%</span>
-        </div>
-      </div>
-
-      <div class="group">
-        <h3>Losas:</h3>
-        <label class="chk"><input type="checkbox" /><span>Colapso</span></label>
-        <div class="inline nowrap">
-          <label class="chk"
-            ><input type="checkbox" /><span>Grietas máx:</span></label
-          >
-          <input class="line-mini" type="text" inputmode="decimal" />
-          <span>mm</span>
-        </div>
-        <div class="inline nowrap">
-          <label class="chk"
-            ><input type="checkbox" /><span>Flecha máx:</span></label
-          >
-          <input class="line-mini" type="text" inputmode="decimal" />
-          <span>cm</span>
-        </div>
-      </div>
-
-      <div class="group">
-        <div class="inline">
-          <span class="lbl">Conexiones:</span>
-          <label class="chk inl"
-            ><input type="checkbox" /><span>Falla</span></label
-          >
-        </div>
-      </div>
-    </aside>
-
-    <!-- MATRIZ CENTRAL -->
-    <section class="center">
-      <div class="damage-grid">
-        <!-- Encabezados verticales (fila 1) -->
-        <div class="vhead" style="grid-column:2;">Colapso</div>
-        <div class="vhead" style="grid-column:3;">Grietas cortante</div>
-        <div class="vhead" style="grid-column:4;">Grietas flexión</div>
-        <div class="vhead" style="grid-column:5;">Aplastamiento</div>
-        <div class="vhead" style="grid-column:6;">Pandeo barras</div>
-        <div class="vhead" style="grid-column:7;">Pandeo placas</div>
-        <div class="vhead" style="grid-column:8;">Falla soldadura</div>
-
-        <!-- Etiquetas de filas (col 1, filas 2..5) -->
-        <div class="rowlabels">
-          <span>Columnas</span>
-          <span>Trabes</span>
-          <span>Muro Concreto</span>
-          <span>Mampost.</span>
-        </div>
-
-        <!-- Celdas 4×7 (col 2..8, filas 2..5) -->
-        <div class="cells">
-          {
-            Array.from({ length: 28 }).map((_, i) => (
-              <label class="chk cell" aria-label={`c${i + 1}`}>
-                <input type="checkbox" />
-              </label>
-            ))
-          }
-        </div>
-
-        <!-- Mediciones (col 9 en desktop; en móvil pasa abajo) -->
-        <div class="measures">
-          <div class="mrow">
-            <span>Ancho máximo<br />de grieta (mm)</span>
-            <input class="line" type="text" />
-          </div>
-          <div class="mrow">
-            <span>Separación de<br />estribos (cm)</span>
-            <input class="line" type="text" />
-            <span class="t">t=</span>
-            <input class="line tiny" type="text" />
-          </div>
-          <div class="mrow">
-            <span>Sección o<br />espesor de muro (cm)</span>
-            <input class="line" type="text" />
-            <span class="t">t=</span>
-            <input class="line tiny" type="text" />
-          </div>
-        </div>
-      </div>
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Plafones</span></label
+        >
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Fachadas</span></label
+        >
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Bardas y pretiles</span></label
+        >
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Cubos <i>(escalera/elevador)</i></span
+          ></label
+        >
+        <label class="chk inl"
+          ><input type="checkbox" /><span>Instalaciones</span></label
+        >
+      </footer>
     </section>
-
-    <!-- DERECHA -->
-    <aside class="right">
-      <div class="box">
-        <h3>Entrepiso crítico (más débil y/o más dañado):</h3>
-        <div class="linepair">
-          <span>No. de columnas (o muros) daño severo =</span>
-          <input class="line" type="text" />
-        </div>
-        <small class="hint"
-          >(colapso, aplastamiento, pandeo, grietas &gt; 3 mm)</small
-        >
-        <div class="linepair">
-          <span>Total de columnas (muros) en el entrepiso =</span>
-          <input class="line" type="text" />
-        </div>
-      </div>
-
-      <div class="box level">
-        <h3>NIVEL DE DAÑO DE LA ESTRUCTURA</h3>
-        <label class="chk"
-          ><input type="checkbox" /><span>Colapso total</span></label
-        >
-        <label class="chk"
-          ><input type="checkbox" /><span>Daño severo</span></label
-        >
-        <label class="chk"
-          ><input type="checkbox" /><span>Daño medio</span></label
-        >
-        <label class="chk"
-          ><input type="checkbox" /><span>Daño ligero</span></label
-        >
-      </div>
-    </aside>
-  </div>
-
-  <!-- OTROS DAÑOS -->
-  <footer class="others">
-    <span class="lbl">Otros daños:</span>
-    <label class="chk inl"><input type="checkbox" /><span>Vidrios</span></label>
-    <label class="chk inl"><input type="checkbox" /><span>Acabados</span></label
-    >
-    <label class="chk inl"><input type="checkbox" /><span>Plafones</span></label
-    >
-    <label class="chk inl"><input type="checkbox" /><span>Fachadas</span></label
-    >
-    <label class="chk inl"
-      ><input type="checkbox" /><span>Bardas y pretiles</span></label
-    >
-    <label class="chk inl"
-      ><input type="checkbox" /><span>Cubos <i>(escalera/elevador)</i></span
-      ></label
-    >
-    <label class="chk inl"
-      ><input type="checkbox" /><span>Instalaciones</span></label
-    >
-  </footer>
-</section>
-
-<style>
-  /* ===== Variables escalables (evitan overflow y mejoran móvil) ===== */
-  :root {
-    --colLabels: clamp(88px, 10vw, 118px);
-    --cellSize: clamp(18px, 2.8vw, 26px);
-    --gapCells: clamp(6px, 1vw, 10px);
-    --headH: clamp(64px, 9vw, 90px);
-    --measuresW: clamp(220px, 28vw, 360px);
-  }
-
-  /* ===== Estilo base coherente con los otros componentes ===== */
-  .panel {
-    width: min(1060px, 94vw);
-    margin: 14px auto;
-    border: 2px solid #00b7c7;
-    background: #fff;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #111;
-    font-size: 13.5px;
-  }
-  .panel__header {
-    background: #00b7c7;
-    color: #fff;
-    padding: 0.55rem 0.9rem;
-    border-bottom: 2px solid #0aa;
-  }
-  .panel__header h2 {
-    margin: 0;
-    font-size: 15.5px;
-    font-weight: 800;
-    letter-spacing: 0.2px;
-  }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 300px 1fr 320px;
-    border-top: 2px solid #000;
-  }
-
-  /* ===== Lado izquierdo ===== */
-  .left {
-    border-right: 2px solid #000;
-    padding: 0.7rem 0.9rem;
-  }
-  .group {
-    margin-bottom: 0.75rem;
-  }
-  .group h3 {
-    margin: 0.2rem 0 0.45rem;
-    font-size: 13.5px;
-    font-weight: 800;
-  }
-  .lbl {
-    font-weight: 700;
-  }
-  .inline {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-  }
-  .nowrap {
-    white-space: nowrap;
-  }
-  .line-mini {
-    width: 84px;
-    border: none;
-    border-bottom: 1.8px solid #0f0f0f;
-    background: transparent;
-    padding: 0.12rem 0.2rem;
-  }
-
-  /* ===== Centro: matriz (sin min-width ni overflow) ===== */
-  .center {
-    border-right: 2px solid #000;
-    padding: 0.7rem 0.7rem;
-  }
-  .damage-grid {
-    display: grid;
-    grid-template-columns: var(--colLabels) repeat(7, var(--cellSize)) var(
-        --measuresW
-      );
-    grid-template-rows: var(--headH) repeat(4, var(--cellSize));
-    column-gap: var(--gapCells);
-    row-gap: var(--gapCells);
-  }
-
-  .vhead {
-    grid-row: 1;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    white-space: nowrap; /* evita doble línea */
-    text-align: center;
-    font-weight: 700;
-    color: #0a0a0a;
-    align-self: end;
-  }
-
-  .rowlabels {
-    grid-column: 1;
-    grid-row: 2 / span 4;
-    display: grid;
-    grid-auto-rows: var(--cellSize);
-    align-items: center;
-    font-weight: 700;
-  }
-
-  .cells {
-    grid-column: 2 / span 7;
-    grid-row: 2 / span 4;
-    display: grid;
-    grid-template-columns: repeat(7, var(--cellSize));
-    grid-auto-rows: var(--cellSize);
-    gap: var(--gapCells);
-  }
-  .cell input {
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border: 1.8px solid #0f0f0f;
-    background: #fff;
-    cursor: pointer;
-  }
-  .cell input:checked {
-    background: #00b7c7;
-    box-shadow: inset 0 0 0 2px #fff;
-  }
-
-  .measures {
-    grid-column: 9;
-    grid-row: 2 / span 4;
-    display: grid;
-    align-content: start;
-    gap: 0.75rem;
-  }
-  .mrow {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    flex-wrap: nowrap;
-  }
-  .line {
-    border: none;
-    border-bottom: 1.8px solid #0f0f0f;
-    background: transparent;
-    padding: 0.12rem 0.2rem;
-    min-width: 150px;
-  }
-  .line.tiny {
-    min-width: 72px;
-  }
-  .t {
-    font-weight: 700;
-  }
-
-  /* ===== Derecha ===== */
-  .right {
-    padding: 0.7rem 0.9rem;
-  }
-  .box {
-    border: 2px solid #000;
-    padding: 0.6rem 0.6rem;
-    margin-bottom: 0.6rem;
-  }
-  .box h3 {
-    margin: 0.1rem 0 0.5rem;
-    font-size: 13.5px;
-  }
-  .linepair {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    white-space: nowrap;
-  }
-  .hint {
-    display: block;
-    margin: 0.15rem 0 0.45rem;
-    color: #39555b;
-    font-size: 11.5px;
-  }
-  .level label {
-    display: block;
-    margin: 0.25rem 0;
-  }
-
-  /* ===== Otros daños ===== */
-  .others {
-    border-top: 2px solid #000;
-    padding: 0.55rem 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-  }
-
-  .chk {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .chk input[type="checkbox"] {
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border: 1.8px solid #0f0f0f;
-    background: #fff;
-    display: inline-grid;
-    place-items: center;
-    cursor: pointer;
-  }
-  .chk input[type="checkbox"]:checked {
-    background: #00b7c7;
-    box-shadow: inset 0 0 0 2px #fff;
-  }
-  .chk.inl {
-    gap: 0.35rem;
-  }
-
-  /* ===== Modo móvil angosto (sin overflow) ===== */
-  @media (max-width: 720px) {
-    .layout {
-      grid-template-columns: 1fr;
-    }
-    .left {
-      border-right: none;
-      border-bottom: 2px solid #000;
-    }
-    .center {
-      border-right: none;
-      border-bottom: 2px solid #000;
-    }
-
-    /* La sección de mediciones baja debajo de la matriz */
-    .damage-grid {
-      grid-template-columns: var(--colLabels) repeat(7, var(--cellSize));
-    }
-    .measures {
-      grid-column: 1 / -1;
-      grid-row: auto;
-      margin-top: 0.6rem;
-      grid-template-columns: 1fr;
-    }
-    .mrow {
-      flex-wrap: wrap;
-    }
-    .line {
-      min-width: 120px;
-    }
-  }
-
-  /* Móvil muy angosto: compacta aún más la matriz */
-  @media (max-width: 390px) {
-    :root {
-      --colLabels: 78px;
-      --cellSize: 16px;
-      --gapCells: 6px;
-      --headH: 60px;
-    }
-    .panel {
-      font-size: 12.5px;
-    }
-    .line-mini {
-      width: 72px;
-    }
-  }
-</style>
+  </body>
+</html>
