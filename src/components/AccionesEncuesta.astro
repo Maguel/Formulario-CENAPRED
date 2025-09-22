@@ -1,46 +1,88 @@
 ---
 // src/components/AccionesEncuesta.astro
-// Barra de acciones con “Guardar” y “Borrar”.
-// Muestra mensajes del navegador (alert/confirm) y recarga al borrar.
+// Barra de acciones para guardar y borrar la encuesta
+// Utiliza diálogos nativos del navegador para confirmación
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
 ---
 
-<section class="panel">
+<section class={`panel ${className ?? ""}`}>
   <div class="actions">
-    <button class="btn btn--ghost" id="btn-borrar" type="button">
+    <button
+      class="btn btn--ghost"
+      id="btn-borrar"
+      type="button"
+      aria-label="Borrar encuesta actual"
+    >
       🗑️ Borrar encuesta
     </button>
 
-    <button class="btn btn--primary" id="btn-guardar" type="button">
+    <button
+      class="btn btn--primary"
+      id="btn-guardar"
+      type="button"
+      aria-label="Guardar encuesta actual"
+    >
       💾 Guardar encuesta
     </button>
   </div>
 </section>
 
 <style>
-  .panel {
-    width: min(1060px, 94vw);
-    margin: 14px auto;
-    border: 2px solid #00b7c7;
-    background: #fff;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #111;
-    font-size: 13.5px;
-    padding: 0.75rem 0.9rem;
+  /* ===== Variables CSS ===== */
+  :root {
+    --color-primary: #00b7c7;
+    --color-primary-hover: #00ccdb;
+    --color-danger: #b3261e;
+    --color-danger-bg: #ffeceb;
+    --color-text: #111;
+    --color-bg: #fff;
+    --font-family: Arial, Helvetica, sans-serif;
+    --font-size-base: 13.5px;
+    --border-width: 2px;
+    --border-radius: 10px;
+    --panel-width: min(1060px, 94vw);
+    --spacing-sm: 0.6rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 0.9rem;
+    --spacing-xl: 14px;
   }
 
+  /* ===== Panel Container ===== */
+  .panel {
+    width: var(--panel-width);
+    margin: var(--spacing-xl) auto;
+    border: var(--border-width) solid var(--color-primary);
+    background: var(--color-bg);
+    font-family: var(--font-family);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ===== Actions Container ===== */
   .actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.6rem;
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
   }
 
+  /* ===== Button Base Styles ===== */
   .btn {
     appearance: none;
-    border: 2px solid transparent;
-    padding: 0.55rem 0.9rem;
-    border-radius: 10px;
+    border: var(--border-width) solid transparent;
+    padding: 0.55rem var(--spacing-lg);
+    border-radius: var(--border-radius);
     font-weight: 700;
+    font-size: inherit;
+    font-family: inherit;
     cursor: pointer;
     transition:
       transform 0.04s ease,
@@ -50,49 +92,132 @@
     line-height: 1;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
     user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
   }
+
   .btn:active {
     transform: translateY(1px);
   }
 
-  .btn--primary {
-    background: #00b7c7;
-    color: #fff;
-    border-color: #00b7c7;
+  .btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
+
+  /* ===== Button Variants ===== */
+  .btn--primary {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+  }
+
   .btn--primary:hover {
-    background: #00ccdb;
-    border-color: #00ccdb;
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
   }
 
   .btn--ghost {
-    background: #fff;
-    color: #b3261e;
-    border-color: #b3261e;
+    background: var(--color-bg);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
   }
+
   .btn--ghost:hover {
-    background: #ffeceb;
+    background: var(--color-danger-bg);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 480px) {
+    .actions {
+      justify-content: stretch;
+    }
+
+    .btn {
+      flex: 1;
+      justify-content: center;
+    }
   }
 </style>
 
-<script is:inline>
-  const $save = document.getElementById("btn-guardar");
-  const $del = document.getElementById("btn-borrar");
+<script>
+  // Tipos para mejorar la seguridad del código
+  interface EncuestaActions {
+    handleSave: () => void;
+    handleDelete: () => void;
+  }
 
-  $save?.addEventListener("click", () => {
-    // Mensaje nativo del navegador
-    alert("Encuesta guardada correctamente.");
+  class EncuestaActionsHandler implements EncuestaActions {
+    private saveButton: HTMLButtonElement | null;
+    private deleteButton: HTMLButtonElement | null;
+
+    constructor() {
+      this.saveButton = document.getElementById(
+        "btn-guardar",
+      ) as HTMLButtonElement;
+      this.deleteButton = document.getElementById(
+        "btn-borrar",
+      ) as HTMLButtonElement;
+      this.init();
+    }
+
+    private init(): void {
+      this.saveButton?.addEventListener("click", this.handleSave.bind(this));
+      this.deleteButton?.addEventListener(
+        "click",
+        this.handleDelete.bind(this),
+      );
+    }
+
+    handleSave(): void {
+      // En producción, aquí iría la lógica real de guardado
+      // Por ahora, mostramos confirmación con alert nativo
+      alert("Encuesta guardada correctamente.");
+
+      // Disparar evento personalizado para que otros componentes puedan reaccionar
+      window.dispatchEvent(
+        new CustomEvent("encuesta:saved", {
+          detail: { timestamp: new Date().toISOString() },
+        }),
+      );
+    }
+
+    handleDelete(): void {
+      const confirmMessage =
+        "¿Deseas borrar la encuesta? Esta acción recargará la página.";
+
+      if (confirm(confirmMessage)) {
+        alert("Encuesta borrada.");
+
+        // Disparar evento antes de recargar
+        window.dispatchEvent(
+          new CustomEvent("encuesta:deleted", {
+            detail: { timestamp: new Date().toISOString() },
+          }),
+        );
+
+        // Pequeño delay para permitir que se procese el evento
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+    }
+
+    // Método para limpiar event listeners si es necesario
+    destroy(): void {
+      this.saveButton?.removeEventListener("click", this.handleSave);
+      this.deleteButton?.removeEventListener("click", this.handleDelete);
+    }
+  }
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener("DOMContentLoaded", () => {
+    new EncuestaActionsHandler();
   });
 
-  $del?.addEventListener("click", () => {
-    // Confirmación nativa + recarga rápida
-    const ok = confirm(
-      "¿Deseas borrar la encuesta? Esta acción recargará la página.",
-    );
-    if (ok) {
-      alert("Encuesta borrada.");
-      // Recarga inmediata para limpiar el formulario
-      window.location.reload();
-    }
+  // Compatibilidad con View Transitions API de Astro
+  document.addEventListener("astro:page-load", () => {
+    new EncuestaActionsHandler();
   });
 </script>

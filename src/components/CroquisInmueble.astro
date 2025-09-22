@@ -1,146 +1,264 @@
 ---
 // src/components/CroquisInmueble.astro
-// “CROQUIS DEL INMUEBLE” – sólo presentación.
-// Mantiene el mismo estilo visual de los componentes previos.
+// Componente para dibujar el croquis del inmueble con indicador de norte
+// Incluye opciones para marcar tipos de planos existentes
+
+interface Props {
+  class?: string;
+  readonly?: boolean;
+}
+
+const { class: className, readonly = false } = Astro.props;
 ---
 
-<section class="panel">
+<section class={`panel ${className ?? ""}`} data-readonly={readonly}>
   <header class="panel__header">
     <h2>CROQUIS DEL INMUEBLE</h2>
 
-    <div class="plans">
+    <div class="plans" role="group" aria-label="Planos existentes">
       <span class="lbl">Existen planos:</span>
-      <label class="chk inl"
-        ><input type="checkbox" /> <span>Arquitectónico</span></label
-      >
-      <label class="chk inl"
-        ><input type="checkbox" /> <span>Estructural</span></label
-      >
-      <label class="chk inl"
-        ><input type="checkbox" /> <span>Ninguno</span></label
-      >
+      <label class="chk chk--inline">
+        <input
+          type="checkbox"
+          name="planos"
+          value="arquitectonico"
+          disabled={readonly}
+        />
+        <span>Arquitectónico</span>
+      </label>
+      <label class="chk chk--inline">
+        <input
+          type="checkbox"
+          name="planos"
+          value="estructural"
+          disabled={readonly}
+        />
+        <span>Estructural</span>
+      </label>
+      <label class="chk chk--inline">
+        <input
+          type="checkbox"
+          name="planos"
+          value="ninguno"
+          disabled={readonly}
+        />
+        <span>Ninguno</span>
+      </label>
     </div>
   </header>
 
-  <!-- Área de croquis (papel milimetrado) -->
+  <!-- Área de croquis -->
   <div class="sketch-wrap">
-    <div class="north">
+    <div class="north-indicator">
       <span class="note">(Marcar el Norte)</span>
-      <div class="arrow">
+      <div class="arrow" aria-label="Indicador de norte">
         <span class="shaft"></span>
         <span class="head"></span>
       </div>
       <span class="n">N</span>
     </div>
 
-    <div class="sketch" aria-label="Área para dibujar el croquis"></div>
+    <div
+      class="sketch"
+      aria-label="Área para dibujar el croquis"
+      role="img"
+      tabindex={readonly ? undefined : "0"}
+    >
+      <canvas id="sketch-canvas" class="sketch__canvas" aria-hidden="true"
+      ></canvas>
+    </div>
   </div>
 </section>
 
 <style>
-  /* ===== Contenedor ===== */
-  .panel {
-    width: min(1060px, 100vw);
-    margin: 14px auto;
-    border: 2px solid #00b7c7;
-    background: #fff;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #111;
-    font-size: 13.5px;
+  /* ===== Variables CSS ===== */
+  :root {
+    --color-primary: #00b7c7;
+    --color-primary-dark: #0aa;
+    --color-primary-light: #69cfd9;
+    --color-grid-strong: #8ddbe3;
+    --color-grid-weak: #cfeff3;
+    --color-text: #111;
+    --color-text-dark: #0f0f0f;
+    --color-text-muted: #335e64;
+    --color-bg: #fff;
+    --font-family: Arial, Helvetica, sans-serif;
+    --font-size-base: 13.5px;
+    --font-size-sm: 12px;
+    --font-size-md: 14px;
+    --font-size-lg: 15.5px;
+    --border-width: 2px;
+    --panel-width: min(1060px, 100vw);
+    --spacing-xs: 0.15rem;
+    --spacing-sm: 0.4rem;
+    --spacing-md: 0.55rem;
+    --spacing-lg: 0.9rem;
+    --spacing-xl: 14px;
+    --grid-size: 20px;
   }
 
+  /* ===== Panel Container ===== */
+  .panel {
+    width: var(--panel-width);
+    margin: var(--spacing-xl) auto;
+    border: var(--border-width) solid var(--color-primary);
+    background: var(--color-bg);
+    font-family: var(--font-family);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ===== Panel Header ===== */
   .panel__header {
-    background: #00b7c7;
-    color: #fff;
-    padding: 0.55rem 0.9rem;
-    border-bottom: 2px solid #0aa;
+    background: var(--color-primary);
+    color: var(--color-bg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: var(--border-width) solid var(--color-primary-dark);
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: end;
     gap: 0.75rem;
   }
+
   .panel__header h2 {
     margin: 0;
-    font-size: 15.5px;
+    font-size: var(--font-size-lg);
     font-weight: 800;
     letter-spacing: 0.2px;
   }
 
+  /* ===== Plans Selector ===== */
   .plans {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     flex-wrap: wrap;
   }
+
   .lbl {
     font-weight: 700;
   }
+
+  /* ===== Checkbox Styles ===== */
   .chk {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--spacing-sm);
+    cursor: pointer;
   }
+
   .chk input[type="checkbox"] {
     appearance: none;
     width: 14px;
     height: 14px;
-    border: 1.8px solid #0f0f0f;
-    background: #fff;
+    border: 1.8px solid var(--color-text-dark);
+    background: var(--color-bg);
     display: inline-grid;
     place-items: center;
     cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
   }
+
   .chk input[type="checkbox"]:checked {
-    background: #00b7c7;
-    box-shadow: inset 0 0 0 2px #fff;
+    background: var(--color-primary);
+    box-shadow: inset 0 0 0 2px var(--color-bg);
   }
-  .chk.inl {
+
+  .chk input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-bg);
+    outline-offset: 2px;
+  }
+
+  .chk input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .chk--inline {
     gap: 0.35rem;
   }
 
-  /* ===== Área de croquis ===== */
+  /* ===== Sketch Area ===== */
   .sketch-wrap {
     position: relative;
     padding: 10px 10px 12px;
-    border-top: 2px solid #00b7c7;
+    border-top: var(--border-width) solid var(--color-primary);
   }
 
-  /* Papel cuadriculado (línea gruesa cada 5 celdas) */
+  /* ===== Grid Background Pattern ===== */
   .sketch {
     height: clamp(360px, 48vw, 520px);
-    border: 2px solid #00b7c7;
+    border: var(--border-width) solid var(--color-primary);
     background:
-      /* cada 5 líneas más fuerte */
-      linear-gradient(#8ddbe3 2px, transparent 2px) top left / 100%
-        calc(20px * 5),
-      linear-gradient(90deg, #8ddbe3 2px, transparent 2px) top left /
-        calc(20px * 5) 100%,
-      /* grid fino */
-        repeating-linear-gradient(#cfeff3 0 1px, transparent 1px 20px),
-      repeating-linear-gradient(90deg, #cfeff3 0 1px, transparent 1px 20px);
-    background-repeat: repeat, repeat, repeat, repeat;
-    box-shadow: inset 0 0 0 2px #69cfd9;
+      /* Líneas gruesas cada 5 celdas */
+      linear-gradient(var(--color-grid-strong) 2px, transparent 2px) top left /
+        100% calc(var(--grid-size) * 5),
+      linear-gradient(90deg, var(--color-grid-strong) 2px, transparent 2px) top
+        left / calc(var(--grid-size) * 5) 100%,
+      /* Grid fino */
+        repeating-linear-gradient(
+          var(--color-grid-weak) 0 1px,
+          transparent 1px var(--grid-size)
+        ),
+      repeating-linear-gradient(
+        90deg,
+        var(--color-grid-weak) 0 1px,
+        transparent 1px var(--grid-size)
+      );
+    background-repeat: repeat;
+    box-shadow: inset 0 0 0 2px var(--color-primary-light);
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
   }
 
-  /* Indicador de Norte en la esquina superior derecha */
-  .north {
+  .sketch:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  [data-readonly="true"] .sketch {
+    cursor: default;
+  }
+
+  /* ===== Canvas para dibujo ===== */
+  .sketch__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* ===== North Indicator ===== */
+  .north-indicator {
     position: absolute;
     top: 10px;
     right: 14px;
     display: grid;
     justify-items: center;
-    gap: 0.15rem;
-    color: #0a0a0a;
+    gap: var(--spacing-xs);
+    color: var(--color-text-dark);
+    z-index: 10;
   }
-  .north .note {
-    font-size: 12px;
-    color: #335e64;
+
+  .north-indicator .note {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
   }
-  .north .n {
+
+  .north-indicator .n {
     font-weight: 800;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     margin-top: -2px;
   }
+
+  /* ===== Arrow Design ===== */
   .arrow {
     position: relative;
     width: 0;
@@ -148,12 +266,14 @@
     display: grid;
     place-items: center;
   }
+
   .shaft {
     width: 2px;
     height: 46px;
-    background: #0f0f0f;
+    background: var(--color-text-dark);
     display: block;
   }
+
   .head {
     position: absolute;
     top: -2px;
@@ -161,27 +281,275 @@
     height: 0;
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    border-bottom: 10px solid #0f0f0f;
+    border-bottom: 10px solid var(--color-text-dark);
   }
 
-  /* ===== Responsivo ===== */
+  /* ===== Responsive Design ===== */
   @media (max-width: 760px) {
     .panel__header {
       grid-template-columns: 1fr;
     }
+
     .plans {
       justify-content: flex-start;
     }
-    .north .note {
+
+    .north-indicator .note {
       font-size: 11.5px;
     }
   }
+
   @media (max-width: 420px) {
     .sketch {
       height: 320px;
     }
-    .north {
+
+    .north-indicator {
       right: 10px;
+    }
+
+    .plans {
+      gap: var(--spacing-md);
+    }
+
+    .chk {
+      width: 100%;
     }
   }
 </style>
+
+<script>
+  // Tipos para el manejo del canvas
+  interface Point {
+    x: number;
+    y: number;
+  }
+
+  interface DrawingState {
+    isDrawing: boolean;
+    points: Point[];
+    readonly: boolean;
+  }
+
+  class SketchCanvas {
+    private canvas: HTMLCanvasElement | null;
+    private ctx: CanvasRenderingContext2D | null;
+    private container: HTMLElement | null;
+    private state: DrawingState;
+    private checkboxes: NodeListOf<HTMLInputElement>;
+
+    constructor() {
+      this.canvas = document.getElementById(
+        "sketch-canvas",
+      ) as HTMLCanvasElement;
+      this.container = this.canvas?.closest(".sketch") as HTMLElement;
+      this.ctx = this.canvas?.getContext("2d") ?? null;
+      this.checkboxes = document.querySelectorAll('input[name="planos"]');
+
+      this.state = {
+        isDrawing: false,
+        points: [],
+        readonly:
+          this.container
+            ?.closest("[data-readonly]")
+            ?.getAttribute("data-readonly") === "true",
+      };
+
+      this.init();
+    }
+
+    private init(): void {
+      if (!this.canvas || !this.ctx || !this.container) return;
+
+      // Configurar el canvas
+      this.setupCanvas();
+
+      // Event listeners para los checkboxes
+      this.setupCheckboxes();
+
+      // Event listeners para el dibujo (si no es readonly)
+      if (!this.state.readonly) {
+        this.setupDrawingEvents();
+      }
+
+      // Manejar resize
+      window.addEventListener("resize", this.handleResize.bind(this));
+    }
+
+    private setupCanvas(): void {
+      if (!this.canvas || !this.container) return;
+
+      const rect = this.container.getBoundingClientRect();
+      this.canvas.width = rect.width;
+      this.canvas.height = rect.height;
+
+      // Configurar estilos del contexto
+      if (this.ctx) {
+        this.ctx.strokeStyle = "#00b7c7";
+        this.ctx.lineWidth = 2;
+        this.ctx.lineCap = "round";
+        this.ctx.lineJoin = "round";
+      }
+    }
+
+    private setupCheckboxes(): void {
+      this.checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener(
+          "change",
+          this.handleCheckboxChange.bind(this),
+        );
+      });
+    }
+
+    private handleCheckboxChange(event: Event): void {
+      const target = event.target as HTMLInputElement;
+
+      // Si se selecciona "Ninguno", desmarcar los otros
+      if (target.value === "ninguno" && target.checked) {
+        this.checkboxes.forEach((cb) => {
+          if (cb.value !== "ninguno") {
+            cb.checked = false;
+          }
+        });
+      }
+      // Si se selecciona otro, desmarcar "Ninguno"
+      else if (target.value !== "ninguno" && target.checked) {
+        this.checkboxes.forEach((cb) => {
+          if (cb.value === "ninguno") {
+            cb.checked = false;
+          }
+        });
+      }
+
+      // Disparar evento personalizado
+      this.dispatchPlanosEvent();
+    }
+
+    private dispatchPlanosEvent(): void {
+      const selectedPlanos = Array.from(this.checkboxes)
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.value);
+
+      window.dispatchEvent(
+        new CustomEvent("croquis:planos-changed", {
+          detail: { planos: selectedPlanos },
+        }),
+      );
+    }
+
+    private setupDrawingEvents(): void {
+      if (!this.container) return;
+
+      this.container.addEventListener(
+        "mousedown",
+        this.startDrawing.bind(this),
+      );
+      this.container.addEventListener("mousemove", this.draw.bind(this));
+      this.container.addEventListener("mouseup", this.stopDrawing.bind(this));
+      this.container.addEventListener(
+        "mouseleave",
+        this.stopDrawing.bind(this),
+      );
+
+      // Touch events para dispositivos móviles
+      this.container.addEventListener(
+        "touchstart",
+        this.handleTouch.bind(this),
+      );
+      this.container.addEventListener("touchmove", this.handleTouch.bind(this));
+      this.container.addEventListener("touchend", this.stopDrawing.bind(this));
+    }
+
+    private startDrawing(event: MouseEvent): void {
+      if (this.state.readonly) return;
+
+      this.state.isDrawing = true;
+      const point = this.getMousePos(event);
+      this.state.points = [point];
+    }
+
+    private draw(event: MouseEvent): void {
+      if (!this.state.isDrawing || !this.ctx) return;
+
+      const point = this.getMousePos(event);
+      this.state.points.push(point);
+
+      // Dibujar línea suave
+      this.ctx.beginPath();
+      this.ctx.moveTo(
+        this.state.points[this.state.points.length - 2].x,
+        this.state.points[this.state.points.length - 2].y,
+      );
+      this.ctx.lineTo(point.x, point.y);
+      this.ctx.stroke();
+    }
+
+    private stopDrawing(): void {
+      if (this.state.isDrawing && this.state.points.length > 1) {
+        // Disparar evento con los puntos dibujados
+        window.dispatchEvent(
+          new CustomEvent("croquis:drawing-complete", {
+            detail: { points: this.state.points },
+          }),
+        );
+      }
+
+      this.state.isDrawing = false;
+      this.state.points = [];
+    }
+
+    private handleTouch(event: TouchEvent): void {
+      event.preventDefault();
+      const touch = event.touches[0];
+      const mouseEvent = new MouseEvent(
+        event.type === "touchstart"
+          ? "mousedown"
+          : event.type === "touchmove"
+            ? "mousemove"
+            : "mouseup",
+        {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+        },
+      );
+
+      if (event.type === "touchstart") this.startDrawing(mouseEvent);
+      else if (event.type === "touchmove") this.draw(mouseEvent);
+    }
+
+    private getMousePos(event: MouseEvent): Point {
+      if (!this.canvas) return { x: 0, y: 0 };
+
+      const rect = this.canvas.getBoundingClientRect();
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+      };
+    }
+
+    private handleResize(): void {
+      this.setupCanvas();
+    }
+
+    // Método público para limpiar el canvas
+    public clear(): void {
+      if (!this.ctx || !this.canvas) return;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    // Método para destruir los event listeners
+    public destroy(): void {
+      window.removeEventListener("resize", this.handleResize);
+    }
+  }
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener("DOMContentLoaded", () => {
+    new SketchCanvas();
+  });
+
+  // Compatibilidad con View Transitions API de Astro
+  document.addEventListener("astro:page-load", () => {
+    new SketchCanvas();
+  });
+</script>
