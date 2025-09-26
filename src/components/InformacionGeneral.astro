@@ -1,8 +1,7 @@
 ---
 // src/components/InformacionGeneral.astro
-// Homologado sin mover el layout del header. Se respeta el formato y orden original:
-// Título arriba, debajo la línea horizontal con Fecha y Coordenadas (N/O) en una misma fila.
-// Se sustituye únicamente el campo "msnm" por un botón contrastado y claro.
+// Formulario de información general con datos del evaluador y geolocalización
+// Sistema de coordenadas actualizado con latitud/longitud
 
 interface Props {
   class?: string;
@@ -11,584 +10,1700 @@ interface Props {
 
 const { class: className, readonly = false } = Astro.props;
 
-const usos = [
-  "Vivienda",
-  "Oficinas",
-  "Comercio",
-  "Escuela",
-  "Hospital",
-  "Iglesia",
-  "Reunión (cine/estadio/salón)",
-  "Industrial (fábrica/bodega)",
-  "Desocupada",
+// Opciones de uso del inmueble
+const usoOptions = [
+  { id: "vivienda", label: "Vivienda" },
+  { id: "oficinas", label: "Oficinas" },
+  { id: "comercio", label: "Comercio" },
+  { id: "escuela", label: "Escuela" },
+  { id: "hospital", label: "Hospital" },
+  { id: "iglesia", label: "Iglesia" },
+  { id: "reunion", label: "Reunión (cine/estadio/salón)" },
+  { id: "industrial", label: "Industrial (fábrica/bodega)" },
+  { id: "desocupada", label: "Desocupada" },
 ] as const;
 
-const topo = [
-  "Loma/Cerro",
-  "Ladera",
-  "Pie de ladera",
-  "Pie de monte",
-  "Rivera río/lago",
-  "Fondo de valle",
-  "Depósitos lacustres",
-  "Costa",
+// Opciones de topografía
+const topografiaOptions = [
+  { id: "planicie", label: "Planicie" },
+  { id: "ladera", label: "Ladera de cerro" },
+  { id: "rivera", label: "Rivera río/lago" },
+  { id: "valle", label: "Fondo de valle" },
+  { id: "depositos", label: "Depósitos lacustres" },
+  { id: "costa", label: "Costa" },
 ] as const;
 ---
 
 <section class={`panel ${className ?? ""}`} data-readonly={readonly}>
-  <header class="panel__header">
-    <h2>INFORMACIÓN GENERAL</h2>
-    <div class="meta">
-      <div class="field-inline">
-        <span>Fecha:</span>
-        <input class="short date" type="date" disabled={readonly} />
-      </div>
-      <div class="field-inline">
-        <span>Coordenadas:&nbsp;</span>
-        <span>Latitud</span>
+  <!-- Sección del Evaluador -->
+  <div class="evaluator-section">
+    <h1 class="form-title">
+      Formato de captura de datos para evaluación estructural
+    </h1>
+    <div class="form-date">Septiembre-2025</div>
+
+    <div class="evaluator-info">
+      <div class="evaluator-field">
+        <label for="evaluador-nombre">Nombre del evaluador:</label>
         <input
-          id="lat"
-          class="short"
           type="text"
-          inputmode="decimal"
-          placeholder="19° 25' 56&quot;"
+          id="evaluador-nombre"
+          name="evaluador-nombre"
+          class="line line--evaluator"
           disabled={readonly}
+          required
         />
-        <span>Longitud</span>
-        <input
-          id="lng"
-          class="short"
-          type="text"
-          inputmode="decimal"
-          placeholder="99° 08' 45&quot;"
-          disabled={readonly}
-        />
-        <!-- Aquí estaba msnm: lo sustituimos por el botón -->
-        <button
-          id="btnCoords"
-          class="btn btn--sm btn--header"
-          type="button"
-          disabled={readonly}
-          title="Rellenar lat/lon automáticamente">Obtener coordenadas</button
-        >
       </div>
-      <small id="coordsStatus" class="hint" role="status" aria-live="polite"
-      ></small>
-    </div>
-  </header>
 
-  <div class="content">
-    <!-- Identificación y ubicación -->
-    <section class="block">
-      <h3 class="block__title">Identificación y ubicación</h3>
-      <div class="grid two">
-        <label class="field field--wide">
-          <span class="lbl">Nombre del inmueble</span>
+      <div class="evaluator-type">
+        <label class="chk">
           <input
-            class="line"
-            type="text"
-            placeholder="Ej. Torre Central"
+            type="checkbox"
+            name="evaluador-tipo"
+            value="ingeniero"
             disabled={readonly}
           />
+          <span>Ingeniero o arquitecto</span>
         </label>
-        <label class="field field--wide">
-          <span class="lbl">Dirección (calle, número, colonia)</span>
+        <label class="chk">
           <input
-            class="line"
-            type="text"
-            placeholder="Av. Reforma 123, Centro"
+            type="checkbox"
+            name="evaluador-tipo"
+            value="estudiante"
             disabled={readonly}
           />
+          <span>Estudiante Ing/Arq.</span>
         </label>
-        <label class="field">
-          <span class="lbl">Municipio/Alcaldía</span>
-          <input class="line" type="text" disabled={readonly} />
-        </label>
-        <label class="field">
-          <span class="lbl">Estado</span>
-          <input class="line" type="text" disabled={readonly} />
-        </label>
-      </div>
-    </section>
-
-    <!-- Contacto -->
-    <section class="block">
-      <h3 class="block__title">Contacto</h3>
-      <div class="grid two">
-        <label class="field">
-          <span class="lbl">Propietario / Responsable</span>
-          <input class="line" type="text" disabled={readonly} />
-        </label>
-        <label class="field">
-          <span class="lbl">Teléfono</span>
+        <label class="chk chk--with-input">
           <input
-            class="line"
-            type="tel"
-            placeholder="+(52) 55 1234 5678"
+            type="checkbox"
+            name="evaluador-tipo"
+            value="otro"
+            id="evaluador-otro-check"
             disabled={readonly}
           />
-        </label>
-        <label class="field field--wide">
-          <span class="lbl">Correo electrónico</span>
-          <input
-            class="line"
-            type="email"
-            placeholder="nombre@dominio.com"
-            disabled={readonly}
-          />
-        </label>
-      </div>
-    </section>
-
-    <!-- Uso -->
-    <section class="block">
-      <h3 class="block__title">Uso</h3>
-      <div class="grid multi">
-        {
-          usos.map((u) => (
-            <label class="chk">
-              <>
-                <input
-                  type="checkbox"
-                  name="uso"
-                  value={u}
-                  disabled={readonly}
-                />
-                <span>{u}</span>
-              </>
-            </label>
-          ))
-        }
-        <label class="chk chk--other">
-          <input type="checkbox" name="uso" value="otro" disabled={readonly} />
           <span>Otro:</span>
           <input
-            class="line-other"
             type="text"
+            class="line-inline line-inline--short"
+            name="evaluador-otro-texto"
             placeholder="Especifique"
             disabled={readonly}
           />
         </label>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Dimensiones y características -->
-    <section class="block">
-      <h3 class="block__title">Dimensiones y características</h3>
-      <div class="grid four">
-        <label class="field">
-          <span class="lbl">No. niveles</span>
-          <input
-            class="line short"
-            type="text"
-            inputmode="numeric"
-            disabled={readonly}
-          />
-        </label>
-        <label class="field">
-          <span class="lbl">No. sótanos</span>
-          <input
-            class="line short"
-            type="text"
-            inputmode="numeric"
-            disabled={readonly}
-          />
-        </label>
-        <label class="field">
-          <span class="lbl">No. ocupantes</span>
-          <input
-            class="line short"
-            type="text"
-            inputmode="numeric"
-            disabled={readonly}
-          />
-        </label>
-        <div class="field dims">
-          <span class="lbl">Dimensiones</span>
-          <div class="dims__row">
-            <div class="dim-field">
-              <span>Frente X</span><input
-                class="line-mini"
-                type="text"
-                inputmode="decimal"
-              /><span>m</span>
-            </div>
-            <div class="dim-field">
-              <span>Fondo Y</span><input
-                class="line-mini"
-                type="text"
-                inputmode="decimal"
-              /><span>m</span>
-            </div>
+  <!-- Header principal -->
+  <header class="panel__header">
+    <h2>INFORMACIÓN GENERAL</h2>
+
+    <div class="meta">
+      <div class="field-inline">
+        <label for="fecha">Fecha:</label>
+        <input
+          type="date"
+          id="fecha"
+          name="fecha"
+          disabled={readonly}
+          required
+        />
+      </div>
+
+      <div
+        class="coordinates-group"
+        role="group"
+        aria-label="Coordenadas geográficas"
+      >
+        <span class="lbl">Coordenadas:</span>
+
+        <div class="coordinate-inputs">
+          <div class="coordinate-field">
+            <label for="coord-lat">Latitud:</label>
+            <input
+              id="coord-lat"
+              class="coordinate-input"
+              type="text"
+              name="latitud"
+              inputmode="decimal"
+              placeholder="19.4326"
+              pattern="^-?\d+\.?\d*$"
+              aria-label="Latitud"
+              disabled={readonly}
+            />
+          </div>
+
+          <div class="coordinate-field">
+            <label for="coord-lng">Longitud:</label>
+            <input
+              id="coord-lng"
+              class="coordinate-input"
+              type="text"
+              name="longitud"
+              inputmode="decimal"
+              placeholder="-99.1332"
+              pattern="^-?\d+\.?\d*$"
+              aria-label="Longitud"
+              disabled={readonly}
+            />
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Topografía -->
-    <section class="block">
-      <h3 class="block__title">Topografía</h3>
-      <div class="grid multi">
-        {
-          topo.map((t) => (
-            <label class="chk">
-              <>
+        <button
+          type="button"
+          id="btn-geolocation"
+          class="btn btn--geo"
+          aria-label="Obtener ubicación actual"
+          disabled={readonly}
+        >
+          📍 Ubicación actual
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Datos básicos -->
+  <div class="form-section">
+    <!-- Nombre del inmueble -->
+    <div class="row row--single">
+      <div class="field">
+        <label class="field-label" for="nombre-inmueble">
+          Nombre del inmueble
+        </label>
+        <input
+          type="text"
+          id="nombre-inmueble"
+          name="nombre-inmueble"
+          class="line"
+          disabled={readonly}
+          required
+        />
+      </div>
+    </div>
+
+    <!-- Dirección: Calle | Colonia | CP -->
+    <div class="row row--three">
+      <div class="field">
+        <label class="field-label" for="calle">Calle y número</label>
+        <input
+          type="text"
+          id="calle"
+          name="calle"
+          class="line"
+          disabled={readonly}
+          required
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="colonia">Colonia</label>
+        <input
+          type="text"
+          id="colonia"
+          name="colonia"
+          class="line"
+          disabled={readonly}
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="cp">Código postal</label>
+        <input
+          type="text"
+          id="cp"
+          name="codigo-postal"
+          class="line"
+          inputmode="numeric"
+          pattern="^\d{5}$"
+          maxlength="5"
+          disabled={readonly}
+        />
+      </div>
+    </div>
+
+    <!-- Ubicación: Ciudad | Municipio | Estado -->
+    <div class="row row--three">
+      <div class="field">
+        <label class="field-label" for="ciudad">Pueblo o ciudad</label>
+        <input
+          type="text"
+          id="ciudad"
+          name="ciudad"
+          class="line"
+          disabled={readonly}
+          required
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="municipio">Delegación/Municipio</label>
+        <input
+          type="text"
+          id="municipio"
+          name="municipio"
+          class="line"
+          disabled={readonly}
+          required
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="estado">Estado</label>
+        <input
+          type="text"
+          id="estado"
+          name="estado"
+          class="line"
+          disabled={readonly}
+          required
+        />
+      </div>
+    </div>
+
+    <!-- Referencias -->
+    <div class="row row--single">
+      <div class="field">
+        <label class="field-label" for="referencias">
+          Referencias <span class="hint-inline"
+            >(entre calles "A" y "B", un sitio notable, etc.)</span
+          >
+        </label>
+        <input
+          type="text"
+          id="referencias"
+          name="referencias"
+          class="line"
+          disabled={readonly}
+        />
+      </div>
+    </div>
+
+    <!-- Contacto y Teléfono -->
+    <div class="row row--two">
+      <div class="field">
+        <label class="field-label" for="contacto">
+          Persona contactada/propietario
+        </label>
+        <input
+          type="text"
+          id="contacto"
+          name="contacto"
+          class="line"
+          disabled={readonly}
+        />
+      </div>
+
+      <div class="field">
+        <label class="field-label">Teléfono:</label>
+        <div class="phone-group" role="group" aria-label="Número telefónico">
+          <span class="phone-symbol">+</span>
+          <input
+            class="phone-input phone-input--country"
+            type="text"
+            name="tel-pais"
+            inputmode="numeric"
+            placeholder="52"
+            maxlength="3"
+            aria-label="Código de país"
+            disabled={readonly}
+          />
+          <span class="phone-symbol">(</span>
+          <input
+            class="phone-input phone-input--area"
+            type="text"
+            name="tel-lada"
+            inputmode="numeric"
+            placeholder="55"
+            maxlength="3"
+            aria-label="Código de área"
+            disabled={readonly}
+          />
+          <span class="phone-symbol">)</span>
+          <input
+            class="phone-input phone-input--number"
+            type="text"
+            name="tel-numero"
+            inputmode="numeric"
+            placeholder="12345678"
+            maxlength="10"
+            aria-label="Número telefónico"
+            disabled={readonly}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Uso del inmueble con layout de dos columnas -->
+  <div class="subpanel">
+    <div class="subpanel-content">
+      <div class="subpanel-column">
+        <h3>Uso:</h3>
+        <div class="checkbox-list">
+          {
+            usoOptions.map((option) => (
+              <label class="chk">
+                <input
+                  type="checkbox"
+                  name="uso"
+                  value={option.id}
+                  disabled={readonly}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))
+          }
+          <label class="chk chk--with-input">
+            <input
+              type="checkbox"
+              name="uso"
+              value="otro"
+              id="uso-otro-check"
+              disabled={readonly}
+            />
+            <span>Otro:</span>
+            <input
+              type="text"
+              class="line-inline"
+              name="uso-otro-texto"
+              disabled={readonly}
+            />
+          </label>
+        </div>
+      </div>
+
+      <!-- Dimensiones y topografía en columna derecha -->
+      <div class="subpanel-column">
+        <div class="characteristics-group">
+          <div class="char-row">
+            <span>No. niveles, n =</span>
+            <input
+              type="text"
+              name="niveles"
+              class="line-mini"
+              inputmode="numeric"
+              pattern="^\d+$"
+              disabled={readonly}
+            />
+          </div>
+          <div class="char-row">
+            <span>No. sótanos:</span>
+            <input
+              type="text"
+              name="sotanos"
+              class="line-mini"
+              inputmode="numeric"
+              pattern="^\d+$"
+              disabled={readonly}
+            />
+          </div>
+          <div class="char-row">
+            <span>No. ocupantes:</span>
+            <input
+              type="text"
+              name="ocupantes"
+              class="line-mini"
+              inputmode="numeric"
+              pattern="^\d+$"
+              disabled={readonly}
+            />
+          </div>
+          <div class="dimensions-title">Dimensiones:</div>
+          <div class="char-row">
+            <span>Frente X =</span>
+            <input
+              type="text"
+              name="dimension-x"
+              class="line-mini"
+              inputmode="decimal"
+              pattern="^\d+\.?\d*$"
+              disabled={readonly}
+            />
+            <span class="unit">m</span>
+          </div>
+          <div class="char-row">
+            <span>Fondo Y =</span>
+            <input
+              type="text"
+              name="dimension-y"
+              class="line-mini"
+              inputmode="decimal"
+              pattern="^\d+\.?\d*$"
+              disabled={readonly}
+            />
+            <span class="unit">m</span>
+          </div>
+        </div>
+
+        <h3 class="topo-title">Topografía:</h3>
+        <div class="checkbox-list">
+          {
+            topografiaOptions.map((option) => (
+              <label class="chk">
                 <input
                   type="checkbox"
                   name="topografia"
-                  value={t}
+                  value={option.id}
                   disabled={readonly}
                 />
-                <span>{t}</span>
-              </>
-            </label>
-          ))
-        }
+                <span>{option.label}</span>
+              </label>
+            ))
+          }
+        </div>
       </div>
-    </section>
+    </div>
   </div>
 </section>
 
 <style>
+  /* ===== Variables CSS ===== */
   :root {
     --color-primary: #00b7c7;
+    --color-primary-hover: #00ccdb;
     --color-primary-dark: #0aa;
-    --color-primary-hover: #00a8b5;
-    --color-bg: #fff;
     --color-text: #111;
     --color-text-dark: #0f0f0f;
-    --color-text-muted: #39555b;
+    --color-text-muted: #55747b;
+    --color-text-light: #0a0a0a;
+    --color-bg: #fff;
+    --color-bg-page: #f5f5f5;
+    --color-border: #000;
+    --color-border-light: #eaeaea;
+    --color-input-placeholder: #8aa5ac;
 
     --font-family: Arial, Helvetica, sans-serif;
     --font-size-base: 13.5px;
+    --font-size-sm: 12.5px;
+    --font-size-xs: 11.5px;
+    --font-size-lg: 15px;
 
     --border-width: 2px;
-    --border-input: 1.8px;
+    --border-width-thin: 1px;
+    --border-width-input: 1.8px;
 
     --panel-width: min(1060px, calc(100vw - 20px));
 
-    --sp-6: 0.45rem;
-    --sp-8: 0.6rem;
-    --sp-10: 0.75rem;
-    --sp-12: 0.9rem;
-    --sp-14: 14px;
+    --spacing-xs: 0.2rem;
+    --spacing-sm: 0.35rem;
+    --spacing-md: 0.55rem;
+    --spacing-lg: 0.75rem;
+    --spacing-xl: 0.9rem;
+    --spacing-2xl: 14px;
 
-    --check-size: 14px;
+    --checkbox-size: 14px;
+    --border-radius: 4px;
   }
 
+  /* ===== Reset & Base ===== */
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
+  /* ===== Panel Container ===== */
   .panel {
     width: var(--panel-width);
-    margin: var(--sp-14) auto;
-    border: var(--border-width) solid var(--color-primary);
+    margin: var(--spacing-2xl) auto;
+    border: 2px solid #00b7c7;
     background: var(--color-bg);
-    color: var(--color-text);
     font-family: var(--font-family);
+    color: var(--color-text);
     font-size: var(--font-size-base);
-    border-radius: 4px;
+    line-height: 1.4;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
+  /* ===== Evaluator Section ===== */
+  .evaluator-section {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: var(--border-width) solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .form-title {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 0.2rem;
+  }
+
+  .form-date {
+    text-align: right;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .evaluator-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .evaluator-field {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .evaluator-field label {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .line--evaluator {
+    flex: 1;
+    max-width: 400px;
+  }
+
+  .evaluator-type {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .line-inline--short {
+    min-width: 100px;
+    max-width: 150px;
+  }
+
+  /* ===== Header ===== */
   .panel__header {
     background: var(--color-primary);
     color: var(--color-bg);
-    padding: var(--sp-8) var(--sp-12);
+    padding: var(--spacing-md) var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
     border-bottom: var(--border-width) solid var(--color-primary-dark);
   }
+
   .panel__header h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
     font-weight: 800;
-    font-size: 15.5px;
-    text-align: left;
+    letter-spacing: 0.3px;
   }
-  .panel__header .meta {
+
+  .meta {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem 1rem;
     flex-wrap: wrap;
-    margin-top: 0.5rem;
+    gap: 1rem;
+    align-items: center;
   }
 
   .field-inline {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: var(--spacing-sm);
+  }
+
+  .field-inline input[type="date"] {
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--color-bg);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+  }
+
+  /* ===== Coordinates Group ===== */
+  .coordinates-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
     flex-wrap: wrap;
   }
 
-  .content {
-    padding: var(--sp-10) var(--sp-12);
+  .coordinate-inputs {
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
   }
 
-  .block {
-    border: var(--border-width) solid #000;
-    padding: var(--sp-10);
-  }
-  .block__title {
-    margin-bottom: var(--sp-8);
-    font-size: 14px;
-    font-weight: 800;
-  }
-
-  .grid {
-    display: grid;
-    gap: 12px;
-  }
-  .grid.two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .grid.four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .grid.multi {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    align-items: start;
-  }
-
-  .field {
+  .coordinate-field {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: var(--spacing-xs);
   }
-  .field--wide {
-    grid-column: 1 / -1;
-  }
-  .lbl {
-    font-size: 12.5px;
-    color: #0a0a0a;
+
+  .coordinate-field label {
     font-weight: 600;
   }
 
-  /* Inputs blancos y compactos */
-  .line {
-    border: var(--border-input) solid #cfd8dc;
+  .coordinate-input {
+    width: clamp(80px, 12vw, 110px);
+    padding: 0.25rem 0.3rem;
+    border: 1px solid var(--color-bg);
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: var(--font-size-base);
     background: var(--color-bg);
-    padding: 0.4rem 0.45rem;
-    font-size: 13.5px;
-    color: #111;
+    color: var(--color-text);
+  }
+
+  /* ===== Geolocation Button ===== */
+  .btn--geo {
+    padding: 0.4rem 0.8rem;
+    background: var(--color-bg);
+    color: var(--color-primary);
+    border: 2px solid var(--color-bg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .btn--geo:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+
+  .btn--geo:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .btn--geo:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn--geo:focus-visible {
+    outline: 2px solid var(--color-bg);
+    outline-offset: 2px;
+  }
+
+  .btn--geo.loading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  /* ===== Form Section ===== */
+  .form-section {
+    padding: 0;
+  }
+
+  /* ===== Rows ===== */
+  .row {
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.8rem var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .row:last-child {
+    border-bottom: none;
+  }
+
+  .row--single {
+    flex-direction: column;
+  }
+
+  .row--two {
+    flex-direction: column;
+  }
+
+  .row--three {
+    flex-direction: column;
+  }
+
+  @media (min-width: 600px) {
+    .panel__header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .row--two {
+      flex-direction: row;
+    }
+
+    .row--two .field {
+      flex: 1;
+    }
+
+    .row--three {
+      flex-direction: row;
+    }
+
+    .row--three .field {
+      flex: 1;
+    }
+  }
+
+  /* ===== Fields ===== */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
+  }
+
+  .field-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    font-weight: 600;
+  }
+
+  .hint-inline {
+    font-style: italic;
+    font-weight: normal;
+    color: var(--color-text-muted);
+  }
+
+  /* ===== Input Lines ===== */
+  .line {
+    border: none;
+    border-bottom: var(--border-width-input) solid var(--color-text-dark);
+    background: transparent;
+    padding: 0.4rem 0.3rem;
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    color: var(--color-text);
     outline: none;
     width: 100%;
-    border-radius: 6px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.2s ease;
   }
+
   .line:focus {
     border-color: var(--color-primary);
   }
-  .line::placeholder {
-    color: #8aa5ac;
+
+  .line:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
-  .line.short {
-    max-width: 120px;
+
+  .line-inline {
+    border: none;
+    border-bottom: var(--border-width-input) solid var(--color-text-dark);
+    background: transparent;
+    padding: 0.3rem;
+    font-size: var(--font-size-base);
+    flex: 1;
+    min-width: 120px;
+    transition: border-color 0.2s ease;
   }
+
+  .line-inline:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .line-inline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .line-mini {
-    border: var(--border-input) solid #cfd8dc;
-    background: var(--color-bg);
-    padding: 0.25rem 0.35rem;
-    font-size: 13px;
-    width: 88px;
-    border-radius: 6px;
-  }
-  .line-other {
-    border: var(--border-input) solid #cfd8dc;
-    background: var(--color-bg);
-    padding: 0.25rem 0.35rem;
-    font-size: 13px;
-    border-radius: 6px;
-    width: 100%;
-    min-width: 0;
+    width: clamp(50px, 10vw, 70px);
+    border: none;
+    border-bottom: var(--border-width-input) solid var(--color-text-dark);
+    background: transparent;
+    padding: 0.2rem;
+    text-align: center;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    transition: border-color 0.2s ease;
   }
 
-  /* Inputs del header (lat/lon/fecha) con fondo blanco y ancho fijo */
-  .short {
-    max-width: 110px;
-    border: var(--border-input) solid #cfd8dc;
-    background: var(--color-bg);
-    padding: 0.25rem 0.35rem;
-    font-size: 13px;
-    border-radius: 6px;
-  }
-  .date {
-    max-width: 160px;
+  .line-mini:focus {
+    outline: none;
+    border-color: var(--color-primary);
   }
 
-  .dims {
-    gap: 8px;
+  .line-mini:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
-  .dims__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    align-items: center;
-  }
-  .dim-field {
+
+  /* ===== Phone Input ===== */
+  .phone-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.3rem;
+    margin-top: var(--spacing-xs);
   }
 
-  /* Checkboxes */
+  .phone-symbol {
+    opacity: 0.75;
+    font-size: var(--font-size-base);
+  }
+
+  .phone-input {
+    border: none;
+    border-bottom: var(--border-width-input) solid var(--color-text-dark);
+    background: transparent;
+    padding: 0.3rem 0.2rem;
+    text-align: center;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    transition: border-color 0.2s ease;
+  }
+
+  .phone-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .phone-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .phone-input--country {
+    width: 45px;
+  }
+
+  .phone-input--area {
+    width: 45px;
+  }
+
+  .phone-input--number {
+    width: 100px;
+  }
+
+  /* ===== Subpanels ===== */
+  .subpanel {
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .subpanel-content {
+    display: flex;
+    gap: 0;
+  }
+
+  .subpanel-column {
+    flex: 1;
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+
+  .subpanel-column:first-child {
+    border-right: var(--border-width) solid var(--color-border);
+  }
+
+  .subpanel h3 {
+    margin: 0 0 var(--spacing-md);
+    font-size: var(--font-size-base);
+    font-weight: 800;
+    color: var(--color-text-dark);
+  }
+
+  .topo-title {
+    margin-top: var(--spacing-xl) !important;
+  }
+
+  /* ===== Characteristics Group ===== */
+  .characteristics-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .char-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .char-row span {
+    font-size: var(--font-size-base);
+    white-space: nowrap;
+  }
+
+  .dimensions-title {
+    font-weight: 700;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .unit {
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+  }
+
+  /* ===== Checkbox List ===== */
+  .checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  /* ===== Checkboxes ===== */
   .chk {
-    display: inline-grid;
-    grid-auto-flow: column;
+    display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    min-height: 24px;
+    gap: var(--spacing-md);
+    cursor: pointer;
   }
+
   .chk input[type="checkbox"] {
     appearance: none;
-    width: var(--check-size);
-    height: var(--check-size);
-    border: var(--border-input) solid var(--color-text-dark);
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+    border: var(--border-width-input) solid var(--color-text-dark);
     background: var(--color-bg);
     display: inline-grid;
     place-items: center;
     cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    border-radius: 2px;
   }
+
   .chk input[type="checkbox"]:checked {
     background: var(--color-primary);
     box-shadow: inset 0 0 0 2px var(--color-bg);
   }
 
-  /* "Otro": evitar desborde */
-  .chk--other {
-    display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.35rem;
+  .chk input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 
-  /* Botón visible en header (contraste sobre fondo teal) */
-  .btn {
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 20px;
-  }
-  .btn--sm {
-    padding: 6px 12px;
-    font-size: 12.5px;
-  }
-  .btn--header {
-    background: #fff;
-    color: var(--color-primary);
-    border: 2px solid var(--color-primary);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  }
-  .btn--header:hover {
-    background: #f7feff;
-  }
-  .btn:disabled {
-    opacity: 0.6;
+  .chk input[type="checkbox"]:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
-  @media (max-width: 1024px) {
-    .grid.four {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .chk--with-input {
+    gap: var(--spacing-sm);
   }
+
+  /* ===== Labels ===== */
+  .lbl {
+    font-weight: 700;
+    color: var(--color-bg);
+  }
+
+  /* ===== Responsive Adjustments ===== */
   @media (max-width: 768px) {
-    .grid.two {
-      grid-template-columns: 1fr;
+    .evaluator-type {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+
+    .subpanel-content {
+      flex-direction: column;
+    }
+
+    .subpanel-column:first-child {
+      border-right: none;
+      border-bottom: var(--border-width) solid var(--color-border);
     }
   }
+
   @media (max-width: 480px) {
     :root {
       --font-size-base: 12.5px;
-      --check-size: 12px;
+      --checkbox-size: 12px;
     }
-    .grid.four {
-      grid-template-columns: 1fr;
-    }
+
     .panel {
-      width: calc(100vw - 10px);
+      width: 100vw;
       margin: 8px auto;
+    }
+
+    .form-title {
+      font-size: 14px;
+    }
+
+    .evaluator-field {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .coordinates-group {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .coordinate-inputs {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .coordinate-field {
+      width: 100%;
+    }
+
+    .coordinate-input {
+      flex: 1;
+    }
+
+    .btn--geo {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .phone-group {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .phone-input {
+      width: 100%;
     }
   }
 </style>
 
 <script>
-  // Geolocalización: estado controlado (sin error prematuro)
-  class GeoLocator {
+  // Tipos para el manejo del formulario
+  interface Coordinates {
+    latitude: number | null;
+    longitude: number | null;
+  }
+
+  interface EvaluatorData {
+    nombre: string;
+    tipo: string[];
+    tipoOtro: string;
+  }
+
+  interface FormData {
+    evaluador: EvaluatorData;
+    fecha: string;
+    coordenadas: Coordinates;
+    inmueble: {
+      nombre: string;
+      calle: string;
+      colonia: string;
+      codigoPostal: string;
+      ciudad: string;
+      municipio: string;
+      estado: string;
+      referencias: string;
+    };
+    contacto: {
+      nombre: string;
+      telefono: {
+        pais: string;
+        lada: string;
+        numero: string;
+      };
+    };
+    uso: string[];
+    usoOtro: string;
+    caracteristicas: {
+      niveles: number;
+      sotanos: number;
+      ocupantes: number;
+      dimensiones: {
+        frente: number;
+        fondo: number;
+      };
+    };
+    topografia: string[];
+  }
+
+  type GeoStatus =
+    | "idle"
+    | "loading"
+    | "success"
+    | "unchanged" // hubo intento pero ya teníamos coords válidas; NO es error
+    | "denied"
+    | "unsupported"
+    | "error";
+
+  class InformacionGeneralHandler {
+    private form: HTMLElement | null;
+    private data: FormData;
+    private readonly: boolean;
+    private geoButton: HTMLButtonElement | null;
     private latInput: HTMLInputElement | null;
     private lngInput: HTMLInputElement | null;
-    private btn: HTMLButtonElement | null;
-    private statusEl: HTMLElement | null;
-    private inFlight = false;
+
+    // Estado de geolocalización robusto
+    private geoState: GeoStatus = "idle";
+    private geoInFlight = false;
+    private geoSafetyTimer: number | null = null;
 
     constructor() {
-      this.latInput = document.querySelector<HTMLInputElement>("#lat");
-      this.lngInput = document.querySelector<HTMLInputElement>("#lng");
-      this.btn = document.querySelector<HTMLButtonElement>("#btnCoords");
-      this.statusEl = document.querySelector<HTMLElement>("#coordsStatus");
+      this.form = document.querySelector("[data-readonly]");
+      this.readonly = this.form?.getAttribute("data-readonly") === "true";
+      this.geoButton = document.getElementById(
+        "btn-geolocation",
+      ) as HTMLButtonElement;
+      this.latInput = document.getElementById("coord-lat") as HTMLInputElement;
+      this.lngInput = document.getElementById("coord-lng") as HTMLInputElement;
 
-      this.handleClick = this.handleClick.bind(this);
-      this.btn?.addEventListener("click", this.handleClick);
-    }
+      this.data = this.initializeData();
 
-    private setStatus(msg: string) {
-      if (this.statusEl) this.statusEl.textContent = msg;
-    }
-
-    private setDisabled(disabled: boolean) {
-      if (this.btn) this.btn.disabled = disabled;
-    }
-
-    private handleClick(): void {
-      if (!("geolocation" in navigator)) {
-        this.setStatus("Geolocalización no soportada por este navegador.");
-        return;
+      if (!this.readonly) {
+        this.init();
       }
-      this.inFlight = true;
-      this.setStatus("Obteniendo coordenadas…");
-      this.setDisabled(true);
+    }
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          this.inFlight = false;
-          const { latitude, longitude } = pos.coords;
-          if (this.latInput) this.latInput.value = latitude.toFixed(6);
-          if (this.lngInput) this.lngInput.value = longitude.toFixed(6);
-          this.setStatus("Coordenadas establecidas.");
-          this.setDisabled(false);
+    private initializeData(): FormData {
+      return {
+        evaluador: { nombre: "", tipo: [], tipoOtro: "" },
+        fecha: "",
+        coordenadas: { latitude: null, longitude: null },
+        inmueble: {
+          nombre: "",
+          calle: "",
+          colonia: "",
+          codigoPostal: "",
+          ciudad: "",
+          municipio: "",
+          estado: "",
+          referencias: "",
         },
-        (err) => {
-          this.inFlight = false;
-          let msg = "No se pudo obtener la ubicación.";
-          if (err.code === 1) msg += " Permiso denegado.";
-          else if (err.code === 2) msg += " Posición no disponible.";
-          else if (err.code === 3) msg += " Tiempo de espera agotado.";
-          this.setStatus(msg);
-          this.setDisabled(false);
+        contacto: {
+          nombre: "",
+          telefono: { pais: "52", lada: "", numero: "" },
         },
-        { enableHighAccuracy: true, maximumAge: 30000, timeout: 20000 },
+        uso: [],
+        usoOtro: "",
+        caracteristicas: {
+          niveles: 0,
+          sotanos: 0,
+          ocupantes: 0,
+          dimensiones: { frente: 0, fondo: 0 },
+        },
+        topografia: [],
+      };
+    }
+
+    private init(): void {
+      this.setupEventListeners();
+      this.setupValidation();
+      this.setupPhoneFormatting();
+      this.setupGeolocation();
+      this.setupEvaluatorListeners();
+    }
+
+    private setupEvaluatorListeners(): void {
+      const evaluadorNombre = document.getElementById(
+        "evaluador-nombre",
+      ) as HTMLInputElement;
+      if (evaluadorNombre) {
+        evaluadorNombre.addEventListener("input", (e) => {
+          this.data.evaluador.nombre = (e.target as HTMLInputElement).value;
+          this.emitChangeEvent("evaluador.nombre", this.data.evaluador.nombre);
+        });
+      }
+
+      const evaluadorTipos = document.querySelectorAll(
+        'input[name="evaluador-tipo"]',
+      );
+      evaluadorTipos.forEach((checkbox) => {
+        checkbox.addEventListener(
+          "change",
+          this.handleEvaluadorTipoChange.bind(this),
+        );
+      });
+
+      const evaluadorOtroCheck = document.getElementById(
+        "evaluador-otro-check",
+      ) as HTMLInputElement;
+      const evaluadorOtroTexto = document.querySelector(
+        'input[name="evaluador-otro-texto"]',
+      ) as HTMLInputElement;
+
+      if (evaluadorOtroCheck && evaluadorOtroTexto) {
+        evaluadorOtroCheck.addEventListener("change", (e) => {
+          const checked = (e.target as HTMLInputElement).checked;
+          evaluadorOtroTexto.disabled = !checked || this.readonly;
+          if (!checked) {
+            evaluadorOtroTexto.value = "";
+            this.data.evaluador.tipoOtro = "";
+          }
+        });
+
+        evaluadorOtroTexto.addEventListener("input", (e) => {
+          this.data.evaluador.tipoOtro = (e.target as HTMLInputElement).value;
+          this.emitChangeEvent(
+            "evaluador.tipoOtro",
+            this.data.evaluador.tipoOtro,
+          );
+        });
+      }
+    }
+
+    private handleEvaluadorTipoChange(event: Event): void {
+      const checkbox = event.target as HTMLInputElement;
+      if (checkbox.checked) {
+        if (!this.data.evaluador.tipo.includes(checkbox.value)) {
+          this.data.evaluador.tipo.push(checkbox.value);
+        }
+      } else {
+        const index = this.data.evaluador.tipo.indexOf(checkbox.value);
+        if (index > -1) this.data.evaluador.tipo.splice(index, 1);
+      }
+      this.emitChangeEvent("evaluador.tipo", this.data.evaluador.tipo);
+    }
+
+    // ===== Geolocalización robusta (sin falsos errores) =====
+    private setupGeolocation(): void {
+      if (!this.geoButton) return;
+
+      let inFlight = false;
+
+      this.geoButton.addEventListener("click", () => {
+        if (inFlight) return;
+        inFlight = true;
+        this.setGeolocationLoading(true);
+
+        // Si no es https ni localhost, no intentes geolocalizar (los navegadores lo bloquean).
+        const isSecure =
+          location.protocol === "https:" || location.hostname === "localhost";
+
+        if (!isSecure || !("geolocation" in navigator)) {
+          // No marcamos error: solo salimos y dejamos lo que ya hubiera.
+          this.setGeolocationLoading(false);
+          inFlight = false;
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+
+            if (this.latInput) this.latInput.value = latitude.toFixed(6);
+            if (this.lngInput) this.lngInput.value = longitude.toFixed(6);
+
+            this.data.coordenadas = { latitude, longitude };
+            this.emitChangeEvent("coordenadas", this.data.coordenadas);
+
+            this.setGeolocationLoading(false);
+            inFlight = false;
+          },
+          (error) => {
+            // Si ya hay coordenadas numéricas, tratamos el fallo como "sin cambios", NO como error.
+            const hasPrev =
+              Number.isFinite(parseFloat(this.latInput?.value || "")) &&
+              Number.isFinite(parseFloat(this.lngInput?.value || ""));
+            if (!hasPrev && error?.code === 1) {
+              // Permiso denegado y sin coords previas: avisa suave si quieres,
+              // pero no llenamos la consola de errores.
+              console.warn("Permiso de ubicación denegado.");
+            }
+            this.setGeolocationLoading(false);
+            inFlight = false;
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 30000, // usa cache reciente si existe (evita timeouts)
+          },
+        );
+      });
+    }
+
+    private requestCurrentPosition(
+      options: PositionOptions,
+    ): Promise<GeolocationPosition> {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+      });
+    }
+
+    private hasValidCoords(): boolean {
+      const { latitude, longitude } = this.data.coordenadas;
+      return typeof latitude === "number" && typeof longitude === "number";
+    }
+
+    private humanGeoError(error: GeolocationPositionError | any): string {
+      // Códigos estándar: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+      switch (error?.code) {
+        case 1:
+          return "Permiso de ubicación denegado.";
+        case 2:
+          return "Ubicación no disponible en este momento.";
+        case 3:
+          return "Se agotó el tiempo para obtener la ubicación.";
+        default:
+          return "Ocurrió un problema al obtener la ubicación.";
+      }
+    }
+
+    private finishGeoAttempt(): void {
+      this.clearGeoTimer();
+      this.setGeolocationLoading(false);
+      this.geoInFlight = false;
+    }
+
+    private clearGeoTimer(): void {
+      if (this.geoSafetyTimer !== null) {
+        clearTimeout(this.geoSafetyTimer);
+        this.geoSafetyTimer = null;
+      }
+    }
+
+    private updateGeoStatus(status: GeoStatus, message?: string): void {
+      this.geoState = status;
+
+      // No ensuciamos la consola con "error" cuando no lo es
+      if (status === "unsupported" || status === "error") {
+        console.error(message || "Error de geolocalización.");
+      } else if (status === "denied") {
+        console.warn(message || "Permiso denegado para geolocalización.");
+      } else if (status === "success") {
+        // mensaje informativo opcional
+        // console.info("Ubicación obtenida.");
+      }
+
+      // Disparamos un evento dedicado por si el UI quiere reaccionar
+      window.dispatchEvent(
+        new CustomEvent("informacion-general:geolocation", {
+          detail: { status, message: message || null, data: this.data },
+        }),
+      );
+
+      // También emitimos el cambio genérico para integraciones existentes
+      this.emitChangeEvent("geolocation.status", {
+        status,
+        message: message || null,
+      });
+    }
+
+    private setGeolocationLoading(loading: boolean): void {
+      if (!this.geoButton) return;
+
+      if (loading) {
+        this.geoButton.classList.add("loading");
+        this.geoButton.setAttribute("aria-busy", "true");
+        this.geoButton.textContent = "⏳ Obteniendo ubicación...";
+        this.geoButton.disabled = true;
+      } else {
+        this.geoButton.classList.remove("loading");
+        this.geoButton.removeAttribute("aria-busy");
+        this.geoButton.textContent = "📍 Ubicación actual";
+        this.geoButton.disabled = this.readonly;
+      }
+    }
+
+    // ===== Fin geolocalización =====
+
+    private setupEventListeners(): void {
+      const fechaInput = document.getElementById("fecha") as HTMLInputElement;
+      if (fechaInput) {
+        fechaInput.addEventListener("change", (e) => {
+          this.data.fecha = (e.target as HTMLInputElement).value;
+          this.emitChangeEvent("fecha", this.data.fecha);
+        });
+      }
+
+      if (this.latInput) {
+        this.latInput.addEventListener("input", (e) => {
+          const value = parseFloat((e.target as HTMLInputElement).value);
+          this.data.coordenadas.latitude = isNaN(value) ? null : value;
+          this.emitChangeEvent(
+            "coordenadas.latitude",
+            this.data.coordenadas.latitude,
+          );
+        });
+      }
+
+      if (this.lngInput) {
+        this.lngInput.addEventListener("input", (e) => {
+          const value = parseFloat((e.target as HTMLInputElement).value);
+          this.data.coordenadas.longitude = isNaN(value) ? null : value;
+          this.emitChangeEvent(
+            "coordenadas.longitude",
+            this.data.coordenadas.longitude,
+          );
+        });
+      }
+
+      const usoCheckboxes = document.querySelectorAll('input[name="uso"]');
+      usoCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", this.handleUsoChange.bind(this));
+      });
+
+      const usoOtroCheck = document.getElementById(
+        "uso-otro-check",
+      ) as HTMLInputElement;
+      const usoOtroTexto = document.querySelector(
+        'input[name="uso-otro-texto"]',
+      ) as HTMLInputElement;
+
+      if (usoOtroCheck && usoOtroTexto) {
+        usoOtroCheck.addEventListener("change", (e) => {
+          const checked = (e.target as HTMLInputElement).checked;
+          usoOtroTexto.disabled = !checked || this.readonly;
+          if (!checked) {
+            usoOtroTexto.value = "";
+            this.data.usoOtro = "";
+          }
+        });
+
+        usoOtroTexto.addEventListener("input", (e) => {
+          this.data.usoOtro = (e.target as HTMLInputElement).value;
+          this.emitChangeEvent("usoOtro", this.data.usoOtro);
+        });
+      }
+
+      const topoCheckboxes = document.querySelectorAll(
+        'input[name="topografia"]',
+      );
+      topoCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener(
+          "change",
+          this.handleTopografiaChange.bind(this),
+        );
+      });
+
+      this.setupTextInputListeners();
+      this.setupNumericInputListeners();
+    }
+
+    private setupTextInputListeners(): void {
+      const textInputs = [
+        { id: "nombre-inmueble", path: "inmueble.nombre" },
+        { id: "calle", path: "inmueble.calle" },
+        { id: "colonia", path: "inmueble.colonia" },
+        { id: "ciudad", path: "inmueble.ciudad" },
+        { id: "municipio", path: "inmueble.municipio" },
+        { id: "estado", path: "inmueble.estado" },
+        { id: "referencias", path: "inmueble.referencias" },
+        { id: "contacto", path: "contacto.nombre" },
+      ];
+
+      textInputs.forEach((input) => {
+        const element = document.getElementById(input.id) as HTMLInputElement;
+        if (element) {
+          element.addEventListener("input", (e) => {
+            const value = (e.target as HTMLInputElement).value;
+            this.setNestedValue(this.data, input.path, value);
+            this.emitChangeEvent(input.path, value);
+          });
+        }
+      });
+    }
+
+    private setupNumericInputListeners(): void {
+      const numericInputs = [
+        { name: "niveles", path: "caracteristicas.niveles" },
+        { name: "sotanos", path: "caracteristicas.sotanos" },
+        { name: "ocupantes", path: "caracteristicas.ocupantes" },
+        { name: "dimension-x", path: "caracteristicas.dimensiones.frente" },
+        { name: "dimension-y", path: "caracteristicas.dimensiones.fondo" },
+      ];
+
+      numericInputs.forEach((input) => {
+        const element = document.querySelector(
+          `input[name="${input.name}"]`,
+        ) as HTMLInputElement;
+        if (element) {
+          element.addEventListener("input", (e) => {
+            const target = e.target as HTMLInputElement;
+            const value = parseFloat(target.value) || 0;
+            this.setNestedValue(this.data, input.path, value);
+            this.emitChangeEvent(input.path, value);
+          });
+        }
+      });
+    }
+
+    private setupValidation(): void {
+      const cpInput = document.getElementById("cp") as HTMLInputElement;
+      if (cpInput) {
+        cpInput.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          target.value = target.value.replace(/\D/g, "").slice(0, 5);
+          this.data.inmueble.codigoPostal = target.value;
+          this.emitChangeEvent("inmueble.codigoPostal", target.value);
+        });
+      }
+
+      const numericOnlyInputs = document.querySelectorAll(
+        'input[inputmode="numeric"]',
+      );
+      numericOnlyInputs.forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          if (!target.name.startsWith("tel-")) {
+            target.value = target.value.replace(/\D/g, "");
+          }
+        });
+      });
+
+      const decimalInputs = document.querySelectorAll(
+        'input[inputmode="decimal"]',
+      );
+      decimalInputs.forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          const value = target.value;
+          const regex = /^-?\d*\.?\d*$/;
+          if (!regex.test(value)) {
+            target.value = value.replace(/[^-\d.]/g, "");
+          }
+        });
+      });
+    }
+
+    private setupPhoneFormatting(): void {
+      const phoneInputs = {
+        pais: document.querySelector(
+          'input[name="tel-pais"]',
+        ) as HTMLInputElement,
+        lada: document.querySelector(
+          'input[name="tel-lada"]',
+        ) as HTMLInputElement,
+        numero: document.querySelector(
+          'input[name="tel-numero"]',
+        ) as HTMLInputElement,
+      };
+
+      if (phoneInputs.pais) {
+        phoneInputs.pais.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          target.value = target.value.replace(/\D/g, "").slice(0, 3);
+          this.data.contacto.telefono.pais = target.value;
+          this.emitChangeEvent(
+            "contacto.telefono",
+            this.data.contacto.telefono,
+          );
+        });
+      }
+
+      if (phoneInputs.lada) {
+        phoneInputs.lada.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          target.value = target.value.replace(/\D/g, "").slice(0, 3);
+          this.data.contacto.telefono.lada = target.value;
+          this.emitChangeEvent(
+            "contacto.telefono",
+            this.data.contacto.telefono,
+          );
+        });
+      }
+
+      if (phoneInputs.numero) {
+        phoneInputs.numero.addEventListener("input", (e) => {
+          const target = e.target as HTMLInputElement;
+          target.value = target.value.replace(/\D/g, "").slice(0, 10);
+          this.data.contacto.telefono.numero = target.value;
+          this.emitChangeEvent(
+            "contacto.telefono",
+            this.data.contacto.telefono,
+          );
+        });
+      }
+    }
+
+    private handleUsoChange(event: Event): void {
+      const checkbox = event.target as HTMLInputElement;
+      if (checkbox.checked) {
+        if (!this.data.uso.includes(checkbox.value))
+          this.data.uso.push(checkbox.value);
+      } else {
+        const index = this.data.uso.indexOf(checkbox.value);
+        if (index > -1) this.data.uso.splice(index, 1);
+      }
+      this.emitChangeEvent("uso", this.data.uso);
+    }
+
+    private handleTopografiaChange(event: Event): void {
+      const checkbox = event.target as HTMLInputElement;
+      if (checkbox.checked) {
+        if (!this.data.topografia.includes(checkbox.value))
+          this.data.topografia.push(checkbox.value);
+      } else {
+        const index = this.data.topografia.indexOf(checkbox.value);
+        if (index > -1) this.data.topografia.splice(index, 1);
+      }
+      this.emitChangeEvent("topografia", this.data.topografia);
+    }
+
+    private setNestedValue(obj: any, path: string, value: any): void {
+      const keys = path.split(".");
+      let current = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+    }
+
+    private emitChangeEvent(field: string, value: any): void {
+      window.dispatchEvent(
+        new CustomEvent("informacion-general:change", {
+          detail: { field, value, data: this.data },
+        }),
       );
     }
 
+    public getData(): FormData {
+      return this.data;
+    }
+
+    public validateForm(): boolean {
+      const required = [
+        "evaluador.nombre",
+        "fecha",
+        "inmueble.nombre",
+        "inmueble.calle",
+        "inmueble.ciudad",
+        "inmueble.municipio",
+        "inmueble.estado",
+      ];
+      for (const field of required) {
+        const value = this.getNestedValue(this.data, field);
+        if (!value) {
+          console.warn(`Campo requerido vacío: ${field}`);
+          return false;
+        }
+      }
+      if (this.data.evaluador.tipo.length === 0) {
+        console.warn("Debe seleccionar al menos un tipo de evaluador");
+        return false;
+      }
+      return true;
+    }
+
+    private getNestedValue(obj: any, path: string): any {
+      const keys = path.split(".");
+      let current = obj;
+      for (const key of keys) {
+        if (current[key] === undefined) return undefined;
+        current = current[key];
+      }
+      return current;
+    }
+
     public destroy(): void {
-      this.btn?.removeEventListener("click", this.handleClick);
-      if (this.inFlight) this.setStatus("");
+      const inputs = document.querySelectorAll("input");
+      inputs.forEach((input) => input.replaceWith(input.cloneNode(true)));
+      const btn = document.getElementById("btn-geolocation");
+      if (btn) btn.replaceWith(btn.cloneNode(true));
+      this.clearGeoTimer();
     }
   }
 
-  let geo: GeoLocator | null = null;
-  const init = () => {
-    geo = new GeoLocator();
-  };
-  const cleanup = () => {
-    geo?.destroy();
-    geo = null;
-  };
+  // ===== Inicialización segura (singleton) =====
+  (() => {
+    const KEY = "__InformacionGeneralHandler__";
 
-  document.addEventListener("DOMContentLoaded", init);
-  document.addEventListener("astro:before-preparation", cleanup);
-  document.addEventListener("astro:page-load", init);
+    const init = () => {
+      const prev = (window as any)[KEY] as
+        | InformacionGeneralHandler
+        | undefined;
+      if (prev && typeof prev.destroy === "function") prev.destroy();
+      (window as any)[KEY] = new InformacionGeneralHandler();
+    };
+
+    document.addEventListener("astro:page-load", init);
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!(window as any)[KEY]) init();
+      });
+    } else {
+      if (!(window as any)[KEY]) init();
+    }
+  })();
+
+  (window as any).InformacionGeneralHandler = InformacionGeneralHandler;
 </script>
